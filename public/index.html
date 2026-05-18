@@ -6,7 +6,6 @@
   <title>KJ's Games Scorecard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
   <style>
     :root {
       --bg: #0a0a14;
@@ -18,6 +17,7 @@
       --text: #e8e8f0;
       --text2: #7878a0;
       --radius: 12px;
+      --danger: #e05555;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -44,7 +44,6 @@
     }
 
     .header-left { display: flex; align-items: center; gap: 10px; }
-
     .header-left h1 {
       font-family: 'Oswald', sans-serif;
       font-size: 1.35rem;
@@ -53,10 +52,7 @@
       text-transform: uppercase;
       letter-spacing: 1.5px;
     }
-
     .header-icon { font-size: 1.5rem; }
-
-    .header-actions { display: flex; gap: 8px; align-items: center; }
 
     .btn-outline {
       background: transparent;
@@ -72,165 +68,57 @@
       text-transform: uppercase;
       transition: all 0.2s;
     }
-
     .btn-outline:hover { background: var(--gold); color: var(--bg); }
 
-    .btn-icon {
-      background: transparent;
-      border: 1.5px solid var(--gold-dim);
-      color: var(--text2);
-      width: 34px;
-      height: 34px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-
-    .btn-icon:hover { border-color: var(--gold); color: var(--gold); }
-
-    /* API Key Screen */
-    #apiKeyScreen {
+    /* ── Screens ── */
+    .screen {
+      display: none;
       flex: 1;
-      display: flex;
-      flex-direction: column;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--gold-dim) transparent;
+    }
+    .screen::-webkit-scrollbar { width: 4px; }
+    .screen::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+    .screen.active { display: flex; flex-direction: column; }
+
+    /* ── Centered screen layout (welcome, personality, etc.) ── */
+    .screen-centered {
       align-items: center;
       justify-content: center;
-      gap: 20px;
-      padding: 40px 24px;
+      gap: 24px;
+      padding: 32px 24px;
       text-align: center;
     }
 
-    #apiKeyScreen h2 {
+    .screen-title {
       font-family: 'Oswald', sans-serif;
-      font-size: 1.6rem;
+      font-size: 1.8rem;
       font-weight: 700;
       color: var(--gold);
       text-transform: uppercase;
       letter-spacing: 2px;
     }
 
-    #apiKeyScreen p {
+    .screen-subtitle {
       color: var(--text2);
-      max-width: 400px;
+      max-width: 420px;
       line-height: 1.7;
       font-size: 0.93rem;
     }
 
-    .key-input-wrap {
-      display: flex;
-      gap: 8px;
-      width: 100%;
-      max-width: 440px;
-    }
-
-    #apiKeyInput {
-      flex: 1;
-      background: var(--bg3);
-      border: 1px solid var(--gold-dim);
-      color: var(--text);
-      border-radius: var(--radius);
-      padding: 11px 14px;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.93rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    #apiKeyInput:focus { border-color: var(--gold); }
-    #apiKeyInput::placeholder { color: var(--text2); }
-
-    #saveKeyBtn {
-      background: var(--gold);
-      color: var(--bg);
-      border: none;
-      padding: 11px 22px;
-      border-radius: var(--radius);
-      cursor: pointer;
-      font-family: 'Oswald', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      white-space: nowrap;
-      transition: all 0.2s;
-    }
-
-    #saveKeyBtn:hover { box-shadow: 0 2px 14px var(--gold-glow); }
-
-    .key-note {
-      font-size: 0.78rem;
-      color: var(--text2);
-      max-width: 400px;
-      line-height: 1.6;
-    }
-
-    .key-note a { color: var(--gold); text-decoration: none; }
-    .key-note a:hover { text-decoration: underline; }
-
-    /* Welcome Screen */
-    #welcomeScreen {
-      flex: 1;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-      padding: 40px 24px;
-      text-align: center;
-    }
-
+    /* ── Welcome ── */
     .welcome-trophy {
       font-size: 5rem;
       animation: float 3s ease-in-out infinite;
       filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.5));
     }
-
     @keyframes float {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-12px); }
     }
 
-    #welcomeScreen h2 {
-      font-family: 'Oswald', sans-serif;
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--gold);
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-
-    #welcomeScreen p { color: var(--text2); max-width: 420px; line-height: 1.7; font-size: 0.95rem; }
-
-    #startBtn {
-      background: var(--gold);
-      color: var(--bg);
-      border: none;
-      padding: 14px 40px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-family: 'Oswald', sans-serif;
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      transition: all 0.2s;
-      margin-top: 8px;
-    }
-
-    #startBtn:hover { transform: scale(1.05); box-shadow: 0 4px 24px var(--gold-glow); }
-
-    .welcome-features {
-      display: flex;
-      gap: 24px;
-      margin-top: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
+    .feature-chips { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
     .feature-chip {
       background: var(--bg3);
       border: 1px solid var(--gold-dim);
@@ -240,145 +128,114 @@
       color: var(--text2);
     }
 
-    /* Chat */
-    #chatArea { flex: 1; display: none; flex-direction: column; overflow: hidden; }
-
-    #messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      scrollbar-width: thin;
-      scrollbar-color: var(--gold-dim) transparent;
-    }
-
-    #messages::-webkit-scrollbar { width: 4px; }
-    #messages::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
-
-    .message {
-      display: flex;
-      flex-direction: column;
-      max-width: 82%;
-      animation: msgIn 0.25s ease;
-    }
-
-    @keyframes msgIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .message.user { align-self: flex-end; }
-    .message.assistant { align-self: flex-start; }
-
-    .msg-label {
-      font-size: 0.72rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 5px;
-      color: var(--text2);
-    }
-
-    .user .msg-label { text-align: right; }
-    .assistant .msg-label { color: var(--gold); }
-
-    .msg-bubble {
-      padding: 12px 16px;
-      border-radius: var(--radius);
-      line-height: 1.65;
-      font-size: 0.93rem;
-    }
-
-    .user .msg-bubble {
-      background: var(--bg3);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-bottom-right-radius: 4px;
-    }
-
-    .assistant .msg-bubble {
-      background: var(--bg2);
-      border: 1px solid var(--gold-dim);
-      border-bottom-left-radius: 4px;
-    }
-
-    .msg-bubble p { margin: 6px 0; }
-    .msg-bubble p:first-child { margin-top: 0; }
-    .msg-bubble p:last-child  { margin-bottom: 0; }
-
-    .msg-bubble h1, .msg-bubble h2, .msg-bubble h3 {
+    /* ── Buttons ── */
+    .btn-primary {
+      background: var(--gold);
+      color: var(--bg);
+      border: none;
+      padding: 14px 40px;
+      border-radius: 8px;
+      cursor: pointer;
       font-family: 'Oswald', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-primary:hover { transform: scale(1.04); box-shadow: 0 4px 24px var(--gold-glow); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1.5px solid var(--gold-dim);
+      color: var(--text2);
+      padding: 10px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+    .btn-danger {
+      background: transparent;
+      border: 1.5px solid rgba(224, 85, 85, 0.3);
+      color: var(--danger);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+    .btn-danger:hover { background: rgba(224, 85, 85, 0.1); }
+
+    /* ── Personality Cards ── */
+    .personality-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .personality-card {
+      background: var(--bg3);
+      border: 2px solid var(--gold-dim);
+      border-radius: var(--radius);
+      padding: 18px 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .personality-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+    .personality-card.selected { border-color: var(--gold); background: var(--gold-dim); }
+
+    .personality-emoji { font-size: 2.2rem; }
+    .personality-name {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
       color: var(--gold);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin: 14px 0 6px;
-    }
-    .msg-bubble h1 { font-size: 1.15rem; }
-    .msg-bubble h2 { font-size: 1.05rem; }
-    .msg-bubble h3 { font-size: 0.95rem; }
-    .msg-bubble h1:first-child, .msg-bubble h2:first-child, .msg-bubble h3:first-child { margin-top: 0; }
-
-    .msg-bubble strong { color: var(--gold); font-weight: 600; }
-    .msg-bubble em { color: #a0a0c0; font-style: italic; }
-    .msg-bubble ul, .msg-bubble ol { margin: 6px 0 6px 20px; }
-    .msg-bubble li { margin: 3px 0; }
-    .msg-bubble code {
-      background: rgba(255,215,0,0.1);
-      padding: 1px 5px;
-      border-radius: 4px;
-      font-size: 0.88em;
-      font-family: monospace;
+      text-align: center;
     }
 
-    .msg-bubble table {
-      border-collapse: collapse;
-      width: 100%;
-      margin: 10px 0;
-      font-size: 0.88rem;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .msg-bubble thead tr { background: var(--gold); color: var(--bg); }
-    .msg-bubble th {
-      padding: 9px 13px;
-      text-align: left;
-      font-family: 'Oswald', sans-serif;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-size: 0.82rem;
-    }
-    .msg-bubble td { padding: 8px 13px; border-bottom: 1px solid var(--gold-dim); }
-    .msg-bubble tbody tr:first-child td { color: var(--gold); font-weight: 600; }
-    .msg-bubble tbody tr:last-child td { border-bottom: none; }
-    .msg-bubble tbody tr:hover td { background: rgba(255,215,0,0.04); }
-
-    .typing { display: flex; gap: 5px; align-items: center; padding: 2px 0; }
-    .typing-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--gold);
-      animation: pulse 1.2s ease-in-out infinite;
-    }
-    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes pulse {
-      0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
-      40%            { transform: scale(1);   opacity: 1; }
-    }
-
-    #inputArea {
-      background: var(--bg2);
-      border-top: 1px solid var(--gold-dim);
-      padding: 14px 20px;
+    /* ── Form Layout ── */
+    .form-section {
       display: flex;
-      gap: 10px;
-      align-items: flex-end;
-      flex-shrink: 0;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+      max-width: 480px;
     }
 
-    #userInput {
+    .form-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    input[type="text"], input[type="number"] {
       flex: 1;
       background: var(--bg3);
       border: 1px solid var(--gold-dim);
@@ -387,39 +244,348 @@
       padding: 10px 14px;
       font-family: 'Inter', sans-serif;
       font-size: 0.93rem;
-      resize: none;
-      max-height: 120px;
-      min-height: 44px;
       outline: none;
       transition: border-color 0.2s;
-      line-height: 1.5;
     }
+    input[type="text"]:focus, input[type="number"]:focus { border-color: var(--gold); }
+    input[type="text"]::placeholder, input[type="number"]::placeholder { color: var(--text2); }
 
-    #userInput:focus { border-color: var(--gold); }
-    #userInput::placeholder { color: var(--text2); }
-    #userInput:disabled { opacity: 0.5; }
-
-    #sendBtn {
-      background: var(--gold);
-      color: var(--bg);
-      border: none;
-      width: 44px; height: 44px;
-      border-radius: var(--radius);
-      cursor: pointer;
-      font-size: 1.1rem;
+    .player-list { display: flex; flex-direction: column; gap: 8px; }
+    .player-row {
       display: flex;
       align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: all 0.2s;
+      gap: 8px;
+      animation: fadeIn 0.2s ease;
     }
-    #sendBtn:hover:not(:disabled) { transform: scale(1.08); box-shadow: 0 2px 14px var(--gold-glow); }
-    #sendBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
-    @media (max-width: 580px) {
-      .message { max-width: 95%; }
-      #messages { padding: 14px; gap: 14px; }
-      .header-left h1 { font-size: 1.05rem; }
+    .player-badge {
+      background: var(--bg3);
+      border: 1px solid var(--gold-dim);
+      border-radius: 8px;
+      padding: 10px 14px;
+      flex: 1;
+      font-size: 0.93rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .player-badge-num {
+      font-family: 'Oswald', sans-serif;
+      color: var(--gold);
+      font-size: 0.85rem;
+      font-weight: 700;
+      min-width: 20px;
+    }
+
+    /* ── Scoring Settings ── */
+    .settings-block {
+      background: var(--bg3);
+      border: 1px solid var(--gold-dim);
+      border-radius: var(--radius);
+      padding: 16px;
+      width: 100%;
+      max-width: 480px;
+    }
+    .settings-block h3 {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+    }
+    .settings-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      font-size: 0.88rem;
+      color: var(--text2);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .settings-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .settings-value { color: var(--text); font-weight: 500; }
+
+    .bonus-list { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+    .bonus-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255,215,0,0.06);
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 0.85rem;
+    }
+    .bonus-item span { color: var(--gold); font-weight: 600; }
+
+    /* ── Hub Screen ── */
+    #screen-hub {
+      padding: 0;
+    }
+    .hub-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      height: 100%;
+    }
+
+    .commentary-banner {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--gold-dim);
+      padding: 14px 20px;
+      font-size: 0.93rem;
+      line-height: 1.6;
+      color: var(--text2);
+      font-style: italic;
+      flex-shrink: 0;
+    }
+    .commentary-banner strong {
+      color: var(--gold);
+      font-style: normal;
+      font-weight: 600;
+    }
+    .mc-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+      font-style: normal;
+    }
+
+    .hub-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--gold-dim) transparent;
+    }
+    .hub-content::-webkit-scrollbar { width: 4px; }
+    .hub-content::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+
+    .section-header {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    /* ── Leaderboard ── */
+    .leaderboard {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .leaderboard thead tr { background: var(--gold); color: var(--bg); }
+    .leaderboard th {
+      padding: 10px 14px;
+      text-align: left;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.8rem;
+    }
+    .leaderboard td { padding: 9px 14px; border-bottom: 1px solid var(--gold-dim); }
+    .leaderboard tbody tr:last-child td { border-bottom: none; }
+    .leaderboard tbody tr:hover td { background: rgba(255,215,0,0.04); }
+    .rank-1 td:first-child { color: var(--gold); font-weight: 700; }
+    .rank-1 .player-col { color: var(--gold); font-weight: 600; }
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .rank-badge.gold-badge { background: var(--gold); color: var(--bg); }
+    .rank-badge.silver-badge { background: #c0c0c0; color: var(--bg); }
+    .rank-badge.bronze-badge { background: #cd7f32; color: var(--bg); }
+    .rank-badge.plain-badge { background: var(--bg3); color: var(--text2); }
+
+    /* ── Game history ── */
+    .games-played {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 24px;
+    }
+    .game-chip {
+      background: var(--bg3);
+      border: 1px solid var(--gold-dim);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.78rem;
+      color: var(--text2);
+    }
+
+    .hub-actions {
+      display: flex;
+      gap: 10px;
+      padding: 16px 20px;
+      background: var(--bg2);
+      border-top: 1px solid var(--gold-dim);
+      flex-shrink: 0;
+    }
+
+    /* ── Add Game Screen ── */
+    #screen-addgame {
+      padding: 20px;
+      gap: 20px;
+    }
+
+    .addgame-header {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .player-rank-list { display: flex; flex-direction: column; gap: 8px; }
+    .player-rank-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg3);
+      border: 1px solid var(--gold-dim);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+    }
+    .player-rank-name { font-weight: 500; font-size: 0.95rem; }
+    .place-select {
+      background: var(--bg2);
+      border: 1px solid var(--gold-dim);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .place-select:focus { border-color: var(--gold); }
+    .place-select option { background: var(--bg2); }
+
+    /* ── Bonus Apply Section ── */
+    .bonus-apply-block {
+      background: var(--bg3);
+      border: 1px solid var(--gold-dim);
+      border-radius: var(--radius);
+      padding: 14px;
+    }
+    .bonus-apply-block h3 {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 10px;
+    }
+    .bonus-apply-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .bonus-apply-name { font-size: 0.88rem; color: var(--text2); flex: 1; }
+    .bonus-pts-label { color: var(--gold); font-weight: 600; font-size: 0.88rem; margin-right: 4px; }
+    .player-select {
+      background: var(--bg2);
+      border: 1px solid var(--gold-dim);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+    }
+    .player-select option { background: var(--bg2); }
+
+    /* ── Celebrate Screen ── */
+    #screen-celebrate {
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0;
+      padding: 0;
+    }
+    .celebrate-top {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 40px 24px 28px;
+      text-align: center;
+      background: linear-gradient(to bottom, rgba(255,215,0,0.08), transparent);
+      width: 100%;
+    }
+    .celebrate-trophy { font-size: 5rem; animation: float 2s ease-in-out infinite; }
+    .celebrate-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .celebrate-winner {
+      font-size: 1.1rem;
+      color: var(--text);
+      font-weight: 600;
+      max-width: 400px;
+      line-height: 1.6;
+    }
+    .celebrate-quote {
+      font-size: 0.93rem;
+      color: var(--text2);
+      font-style: italic;
+      max-width: 420px;
+      line-height: 1.7;
+    }
+    .celebrate-leaderboard { width: 100%; padding: 0 20px 20px; }
+    .celebrate-actions { padding: 0 20px 30px; display: flex; gap: 10px; }
+
+    /* ── Step Indicator ── */
+    .step-indicator {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .step-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--gold-dim);
+      transition: background 0.2s;
+    }
+    .step-dot.active { background: var(--gold); }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .personality-grid { grid-template-columns: repeat(2, 1fr); }
+      .leaderboard th, .leaderboard td { padding: 8px 10px; }
+      .screen-title { font-size: 1.4rem; }
     }
   </style>
 </head>
@@ -430,312 +596,752 @@
     <span class="header-icon">🏆</span>
     <h1>KJ's Games Scorecard</h1>
   </div>
-  <div class="header-actions">
-    <button class="btn-icon" onclick="showKeyScreen()" title="Change API key">🔑</button>
-    <button class="btn-outline" onclick="newSession()">New Session</button>
-  </div>
+  <button class="btn-outline" onclick="newSession()">New Session</button>
 </header>
 
-<!-- API Key Setup -->
-<div id="apiKeyScreen">
-  <div style="font-size:3rem">🔑</div>
-  <h2>Enter Your API Key</h2>
-  <p>This app runs entirely in your browser. Your Anthropic API key is stored only in your local browser storage and never sent anywhere except Anthropic's API.</p>
-  <div class="key-input-wrap">
-    <input id="apiKeyInput" type="password" placeholder="sk-ant-..." />
-    <button id="saveKeyBtn" onclick="saveKey()">Save</button>
-  </div>
-  <p class="key-note">
-    Don't have a key? Get one at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>.
-    Your key is saved to <code>localStorage</code> and never leaves your device.
-  </p>
-</div>
-
-<!-- Welcome -->
-<div id="welcomeScreen">
+<!-- SCREEN: Welcome -->
+<div id="screen-welcome" class="screen screen-centered active">
   <div class="welcome-trophy">🏆</div>
-  <h2>KJ's Games Scorecard</h2>
-  <p>Your AI-powered MC and scorekeeper is ready to hype up game night. Pick a personality, add your players, and let the games begin.</p>
-  <div class="welcome-features">
+  <div class="screen-title">KJ's Games Scorecard</div>
+  <p class="screen-subtitle">Your MC and scorekeeper for game night. Set up players, track results, and crown the champion.</p>
+  <div class="feature-chips">
     <span class="feature-chip">🎮 Any game</span>
     <span class="feature-chip">📊 Auto scoring</span>
     <span class="feature-chip">🎤 Custom MC</span>
     <span class="feature-chip">🏅 Live leaderboard</span>
   </div>
-  <button id="startBtn" onclick="startSession()">Start Session</button>
+  <button class="btn-primary" onclick="showScreen('personality')">Start Game Night</button>
 </div>
 
-<!-- Chat -->
-<div id="chatArea">
-  <div id="messages"></div>
-  <div id="inputArea">
-    <textarea id="userInput" placeholder="Type your response…" rows="1"
-      onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-    <button id="sendBtn" onclick="sendMessage()" title="Send">&#9658;</button>
+<!-- SCREEN: Personality -->
+<div id="screen-personality" class="screen screen-centered">
+  <div class="step-indicator">
+    <div class="step-dot active"></div>
+    <div class="step-dot"></div>
+    <div class="step-dot"></div>
+  </div>
+  <div class="screen-title">Pick Your MC Vibe</div>
+  <p class="screen-subtitle">Your MC will hype up the competition all night in their signature style.</p>
+  <div class="personality-grid" id="personalityGrid"></div>
+  <button class="btn-primary" id="personalityNext" onclick="goToPlayers()" disabled>Next: Add Players</button>
+</div>
+
+<!-- SCREEN: Players -->
+<div id="screen-players" class="screen screen-centered">
+  <div class="step-indicator">
+    <div class="step-dot"></div>
+    <div class="step-dot active"></div>
+    <div class="step-dot"></div>
+  </div>
+  <div class="screen-title">Who's Playing?</div>
+  <p class="screen-subtitle">Add everyone competing tonight. Minimum 2 players.</p>
+  <div class="form-section">
+    <div>
+      <div class="form-label">Add a player</div>
+      <div class="input-row">
+        <input type="text" id="playerNameInput" placeholder="Player name…" maxlength="24"
+          onkeydown="if(event.key==='Enter') addPlayer()">
+        <button class="btn-primary" style="padding:10px 20px;font-size:0.9rem" onclick="addPlayer()">Add</button>
+      </div>
+    </div>
+    <div class="player-list" id="playerList"></div>
+  </div>
+  <div style="display:flex;gap:10px">
+    <button class="btn-secondary" onclick="showScreen('personality')">Back</button>
+    <button class="btn-primary" id="playersNext" onclick="goToScoring()" disabled>Next: Scoring</button>
+  </div>
+</div>
+
+<!-- SCREEN: Scoring Settings -->
+<div id="screen-scoring" class="screen screen-centered">
+  <div class="step-indicator">
+    <div class="step-dot"></div>
+    <div class="step-dot"></div>
+    <div class="step-dot active"></div>
+  </div>
+  <div class="screen-title">Scoring Settings</div>
+  <p class="screen-subtitle">Here are the default rules. Add bonus point types or start with defaults.</p>
+  <div class="settings-block">
+    <h3>Default Rules</h3>
+    <div class="settings-row">
+      <span>Scoring model</span>
+      <span class="settings-value">Finishing-order points</span>
+    </div>
+    <div class="settings-row">
+      <span>1st place (N players)</span>
+      <span class="settings-value">N pts → 1 pt for last</span>
+    </div>
+    <div class="settings-row">
+      <span>Ties</span>
+      <span class="settings-value">Average + round up</span>
+    </div>
+    <div class="settings-row">
+      <span>Final game</span>
+      <span class="settings-value">Bank (ends competition)</span>
+    </div>
+  </div>
+  <div class="settings-block" style="max-width:480px">
+    <h3>Bonus Point Types <span style="color:var(--text2);font-size:0.75rem;font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></h3>
+    <p style="font-size:0.83rem;color:var(--text2);margin-bottom:12px">Define bonus types you can award after each game (e.g. "Trash Talk Champion: +2 pts").</p>
+    <div class="input-row">
+      <input type="text" id="bonusNameInput" placeholder="Bonus name…" maxlength="30" style="flex:2"
+        onkeydown="if(event.key==='Enter') addBonusType()">
+      <input type="number" id="bonusPtsInput" placeholder="Pts" min="1" max="99" style="flex:0.6;min-width:60px">
+      <button class="btn-primary" style="padding:10px 16px;font-size:0.85rem;white-space:nowrap" onclick="addBonusType()">+ Add</button>
+    </div>
+    <div class="bonus-list" id="bonusList"></div>
+  </div>
+  <div style="display:flex;gap:10px">
+    <button class="btn-secondary" onclick="showScreen('players')">Back</button>
+    <button class="btn-primary" onclick="startGame()">Looks Good — Start!</button>
+  </div>
+</div>
+
+<!-- SCREEN: Hub -->
+<div id="screen-hub" class="screen">
+  <div class="hub-inner">
+    <div class="commentary-banner" id="commentaryBanner">
+      <div class="mc-label" id="mcLabel">MC</div>
+      <div id="commentaryText"></div>
+    </div>
+    <div class="hub-content">
+      <div class="section-header" id="leaderboardLabel">Leaderboard</div>
+      <table class="leaderboard" id="leaderboardTable"></table>
+      <div id="gamesPlayedSection" style="display:none">
+        <div class="section-header" style="margin-top:8px">Games Played</div>
+        <div class="games-played" id="gamesPlayedChips"></div>
+      </div>
+    </div>
+    <div class="hub-actions">
+      <button class="btn-primary" style="flex:1" onclick="showScreen('addgame');initAddGame()">+ Add Game Result</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: Add Game -->
+<div id="screen-addgame" class="screen">
+  <div class="addgame-header">Enter Game Result</div>
+  <div class="form-section" style="max-width:100%">
+    <div>
+      <div class="form-label">Game Name</div>
+      <input type="text" id="gameNameInput" placeholder="e.g. Darts, Billiards, Bank…" maxlength="40">
+      <div style="font-size:0.78rem;color:var(--text2);margin-top:5px">Enter "Bank" to play the final game and end the competition.</div>
+    </div>
+    <div>
+      <div class="form-label">Finishing Order — select each player's place (ties allowed)</div>
+      <div class="player-rank-list" id="playerRankList"></div>
+    </div>
+    <div class="bonus-apply-block" id="bonusApplyBlock" style="display:none">
+      <h3>Award Bonus Points</h3>
+      <div id="bonusApplyRows"></div>
+      <div style="font-size:0.78rem;color:var(--text2);margin-top:4px">Leave at "Nobody" to skip a bonus.</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:auto;padding-top:16px">
+    <button class="btn-secondary" onclick="showScreen('hub')">Cancel</button>
+    <button class="btn-primary" style="flex:1" onclick="submitGame()">Submit Results</button>
+  </div>
+</div>
+
+<!-- SCREEN: Celebrate -->
+<div id="screen-celebrate" class="screen">
+  <div class="celebrate-top">
+    <div class="celebrate-trophy">🏆</div>
+    <div class="celebrate-title">Champion!</div>
+    <div class="celebrate-winner" id="celebrateWinner"></div>
+    <div class="celebrate-quote" id="celebrateQuote"></div>
+  </div>
+  <div class="celebrate-leaderboard">
+    <div class="section-header">Final Standings</div>
+    <table class="leaderboard" id="finalLeaderboard"></table>
+  </div>
+  <div class="celebrate-actions">
+    <button class="btn-primary" style="flex:1" onclick="newSession()">New Session</button>
   </div>
 </div>
 
 <script>
-  marked.use({ gfm: true, breaks: true });
+  // ── Personalities ──────────────────────────────────────────────
+  const PERSONALITIES = {
+    cheesehead: {
+      name: 'Wisconsin Cheesehead',
+      emoji: '🧀',
+      intro: [
+        "Ope! Welcome to game night, doncha know! Grab a cold one — this is gonna be real nice, yah!",
+        "Hey dere, everyone! Your MC is here, you betcha! Let's have ourselves a real good time tonight!",
+      ],
+      gameStart: [
+        "Alright, we're playin' {game}! Oh ya, this is gonna be somethin' else!",
+        "{game}?! Oh, that's real nice. Let's see what ya got, eh!",
+        "Ope, hold on — {game} is up! Watch your back or you'll end up on the bottom of the pile, yah!",
+      ],
+      firstPlace: [
+        "{player} wins {game}! Oh ya, that's real nice — you betcha!",
+        "Holy smokes! {player} takes {game}! Better than a Friday night fish fry!",
+        "{player} on top in {game}! Don't be braggy now — but go ahead, you earned it!",
+      ],
+      lastPlace: [
+        "Oof, {player} in last. Could be worse — could be a Bears fan, dontcha know!",
+        "{player} had a rough one in {game}. Chin up! We got cheese curds.",
+        "Last place for {player}! Ope, sorry 'bout that! Happens to the best of us, yah.",
+      ],
+      leaderUpdate: [
+        "{leader} is on top with {pts} points! Just like the Packers — number one, yah!",
+        "Standings update, doncha know: {leader} leads with {pts} points. Real nice!",
+        "{leader} out front with {pts} points! Hotter than a cheese curd on a summer day!",
+      ],
+      finalWin: [
+        "HOLY SMOKES! {winner} wins the whole shebang!! Better than a Green Bay sweep, doncha know! 🧀",
+        "Oh ya, {winner} is your CHAMPION! Buy 'em a beer and some curds — they earned it, you betcha!!",
+      ],
+      tie: [
+        "Ope, we got a tie between {players}! Tiebreaker: who can say 'bubbler' faster?",
+        "A tie! That's just like cheese — better when it's shared, doncha know!",
+        "{players} are all tied up! Midwest Nice in action right there, yah!",
+      ],
+    },
+    pirate: {
+      name: 'Pirate Captain',
+      emoji: '🏴‍☠️',
+      intro: [
+        "AHOY, ye landlubbers! Welcome aboard the S.S. Game Night! Tonight we sail for GLORY!",
+        "Gather 'round, ye scallywags! I be yer Captain for the evenin' — may the best pirate win!",
+      ],
+      gameStart: [
+        "All hands on deck for {game}! Man the cannons, ye sorry crew!",
+        "Batten down the hatches — {game} is upon us! Ye'll be needin' all yer sea legs!",
+        "Argh, {game} it is! May the best buccaneer win, arr!",
+      ],
+      firstPlace: [
+        "{player} claims the treasure in {game}! SHIVER ME TIMBERS!",
+        "Blimey! {player} wins {game}! They've earned their place in the captain's log!",
+        "{player} plunders {game}! A worthy buccaneer if I ever saw one, arr!",
+      ],
+      lastPlace: [
+        "{player} finishes last — MAKE 'EM WALK THE PLANK! ...Or just buy the next round.",
+        "Davy Jones is callin' for {player}! Better luck at the next port, matey!",
+        "Last place for {player} in {game}! The kraken sends its regards, arr!",
+      ],
+      leaderUpdate: [
+        "{leader} leads with {pts} pieces of eight — err, POINTS! Captain material right there!",
+        "Crow's nest report: {leader} atop the standings with {pts} points! ARGH!",
+        "{leader} commands the seas with {pts} points! The rest of ye best pick up the pace!",
+      ],
+      finalWin: [
+        "AVAST! {winner} has plundered the ENTIRE competition! All hail the Pirate King/Queen!! 🏴‍☠️",
+        "{winner} wins the whole treasure chest! The seven seas have a new master tonight! ARGH!",
+      ],
+      tie: [
+        "A tie between {players}?! This calls for a duel at dawn — or just split the booty, arr!",
+        "Blimey, {players} are deadlocked! Even the kraken couldn't separate 'em!",
+        "{players} tied?! These be uncharted waters, mateys! Ye'll share the plunder equally!",
+      ],
+    },
+    announcer: {
+      name: 'Sports Announcer',
+      emoji: '🎙️',
+      intro: [
+        "GOOD EVENING and welcome to what promises to be a SPECTACULAR night of competition! YOUR MC IS READY!",
+        "Ladies and gentlemen, we are LIVE for Game Night! The energy in this room is absolutely ELECTRIC!",
+      ],
+      gameStart: [
+        "And we are UNDERWAY in {game}! The crowd is on their FEET!",
+        "{game} is about to begin! THIS. IS. IT. FOLKS! Can you feel the TENSION?!",
+        "AND HERE WE GO with {game}!! History is about to be made — I can FEEL it!!",
+      ],
+      firstPlace: [
+        "AND {player} WINS {game}!! AN ABSOLUTELY INCREDIBLE PERFORMANCE!!",
+        "{player} takes the top spot in {game}! What a display of PURE DOMINANCE!",
+        "UNBELIEVABLE! {player} wins {game}!! The analysts will be talking about this one!!",
+      ],
+      lastPlace: [
+        "{player} finishes last in {game}... A tough showing. But they'll be BACK, folks. They WILL be back.",
+        "Last place for {player} in {game}. A difficult moment. But that's the beauty of competition.",
+        "{player} struggles in {game}. The coaching staff will have some film to review this evening.",
+      ],
+      leaderUpdate: [
+        "{leader} leads with {pts} points! A COMMANDING performance so far in this competition!",
+        "THE STANDINGS: {leader} out in front with {pts} points! Can ANYONE catch them?!",
+        "{leader} atop the leaderboard with {pts} points! They are absolutely IN THE ZONE!!",
+      ],
+      finalWin: [
+        "AND {winner} IS YOUR CHAMPION!! WHAT A NIGHT!! THE CROWD GOES ABSOLUTELY WILD!! 🎙️",
+        "IN A NIGHT FOR THE AGES — {winner} WINS IT ALL!! We are WITNESSING GREATNESS right here!!",
+      ],
+      tie: [
+        "WE HAVE A TIE between {players}!! The judges are conferring! Incredible scenes tonight!",
+        "DEADLOCKED! {players} are perfectly matched! This is UNPRECEDENTED drama!!",
+        "{players} tied?! Folks, I've been announcing for YEARS and I have NEVER seen anything like this!",
+      ],
+    },
+    pitmaster: {
+      name: 'Southern BBQ Pitmaster',
+      emoji: '🔥',
+      intro: [
+        "Well, slap my brisket and call me happy — it's game night, y'all! Fire's hot and so is this competition!",
+        "Alright y'all, fire up the pit! We got ourselves a competition tonight that's gonna be smokin'!",
+      ],
+      gameStart: [
+        "Low and slow — just like our approach to {game}! Let's smoke 'em!",
+        "Smell that? That's the smell of {game} and VICTORY, sugar!",
+        "{game} time, y'all! It's about to get hotter than a smoker in July!",
+      ],
+      firstPlace: [
+        "{player} wins {game}! Hotter than a jalapeño on a July afternoon!",
+        "{player} takes {game}! They're basting in glory right now, I tell ya!",
+        "{player} smokes the competition in {game}! That right there is championship BBQ, y'all!",
+      ],
+      lastPlace: [
+        "{player} finishes last… bless their heart. Even burnt ends are still good eatin', sugar.",
+        "Last place for {player} in {game}. Don't worry — we'll put you back on the smoker, hon.",
+        "{player} had a rough one in {game}. But we don't waste nothin' at this pit! You'll bounce back!",
+      ],
+      leaderUpdate: [
+        "{leader} leads with {pts} points! Hotter than the coals in my offset smoker!",
+        "Standings, y'all: {leader} sittin' pretty with {pts} points! Smoke 'em if you got 'em!",
+        "{leader} out front with {pts} points! That right there is prime brisket performance, sugar!",
+      ],
+      finalWin: [
+        "WELL HOT DAMN! {winner} wins it all! Better than 12-hour smoked brisket — and THAT is sayin' somethin'! 🔥",
+        "{winner} is the CHAMPION! Crown 'em with a smoke ring and call it a night, y'all! BBQ ROYALTY!!",
+      ],
+      tie: [
+        "A tie between {players}?! Hotter and messier than a sauce fight at the pit!",
+        "{players} tied up tighter than a rack of ribs! Love to see it, y'all!",
+        "{players} are dead even! Two pitmasters arguin' rub vs. sauce — no wrong answer!",
+      ],
+    },
+    vegas: {
+      name: 'Vegas Emcee',
+      emoji: '🎰',
+      intro: [
+        "Welcome to the most ELECTRIFYING game night in town! The house always wins — but tonight, YOU might too!",
+        "Ladies and gentlemen, the jackpot tonight is BRAGGING RIGHTS. Let's play, baby!",
+      ],
+      gameStart: [
+        "Place your bets — {game} is on the table! Who's feeling lucky tonight?",
+        "The wheel is spinning for {game}! HIGH STAKES, baby — let's go!",
+        "Cards are dealt in {game}! Lady Luck is watching, folks!",
+      ],
+      firstPlace: [
+        "{player} HITS THE JACKPOT in {game}! WINNER WINNER chicken dinner!",
+        "JACKPOT! {player} wins {game}! The house is SHOOK!",
+        "{player} cashes in on {game}! Rolling sevens all night!",
+      ],
+      lastPlace: [
+        "{player} finishes last in {game}. The house wins some nights. Time to hit the buffet and reset!",
+        "Tough roll for {player} in {game}! Even the high rollers have off nights, baby.",
+        "{player} craps out in {game}! Happens to the best — come back swinging!",
+      ],
+      leaderUpdate: [
+        "{leader} holds the chips with {pts} points! Eyes on the prize, folks!",
+        "The count: {leader} up {pts} points! They've got the dealer's edge!",
+        "{leader} sitting pretty with {pts} points! Who's doubling down?",
+      ],
+      finalWin: [
+        "LADIES AND GENTLEMEN — {winner} IS YOUR JACKPOT CHAMPION! The strip is YOURS tonight! 🎰",
+        "JACKPOT! JACKPOT! {winner} takes the WHOLE POT!! COMPS FOR EVERYONE!! 🎰",
+      ],
+      tie: [
+        "A tie between {players}?! PUSH! We pay on ties tonight, baby!",
+        "{players} tied?! That's a split pot — Vegas loves a good split!",
+        "PUSH! {players} are all square! Even the house didn't see that coming!",
+      ],
+    },
+  };
 
-  const SYSTEM_PROMPT = `You are an AI-powered scorekeeper and hype-man for a friendly group competition called "KJ's Games Scorecard."
+  // ── State ──────────────────────────────────────────────────────
+  const state = {
+    personality: null,
+    players: [],
+    bonusTypes: [],  // [{name, pts}]
+    games: [],       // [{name, scores: {player: pts}, bonuses: {player: pts}}]
+    totalScores: {}, // {player: cumPts}
+    gameOver: false,
+  };
 
----
+  // ── Utilities ──────────────────────────────────────────────────
+  function pick(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
 
-SESSION SETUP (runs once at the start of every new session):
+  function fillTemplate(str, vars) {
+    return str.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? `{${k}}`);
+  }
 
-Before anything else, collect the following in order:
+  function mc() {
+    return PERSONALITIES[state.personality];
+  }
 
-1. **MC Personality** — Ask: "How should I act as your MC? Give me a vibe, theme, or character (e.g. 'Wisconsin cheesehead', 'pirate', 'overly dramatic sports announcer', 'southern BBQ pitmaster'). I'll lean into it hard."
+  function mcLine(key, vars = {}) {
+    const lines = mc()[key];
+    return fillTemplate(pick(lines), vars);
+  }
 
-2. **Player Names** — Ask: "Who's playing today? Give me all the names."
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+  }
 
-3. **Scoring Settings** — Before locking in, present the current scoring rules and ask if they want to change anything:
-
-   Default scoring settings:
-   - Scoring model: Finishing-order points (1st = N pts, last = 1 pt, where N = number of players)
-   - Ties: Split combined place points, round up (ceiling) to nearest whole number
-   - Final game: Bank (dice) — signals end of competition, uses standard scoring
-   - Bonus points: None by default
-
-   Ask: "Want to tweak any of these before we start? You can change the scoring model, add bonus points for anything (longest streak, trash talk champion, etc.), or adjust tie rules. Say 'looks good' to use defaults."
-
-   Lock in whatever settings they confirm, and briefly summarize them.
-
-Once all three are set, greet the group with a punchy 2–3 sentence intro that matches the MC personality. Then ask what game they're playing first.
-
----
-
-PERSONALITY:
-Fully embody whatever MC personality was given. Use matching slang, humor, references, and flavor throughout — in commentary, taunts, celebrations, and transitions. Keep it short and punchy. Never break character.
-
----
-
-GAMES:
-The game list is completely flexible — players may skip games, invent new ones, or play in any order. The ONLY thing that signals the end of the competition is when a player chooses "Bank" (a dice game) as the next game. Bank is ALWAYS the final game and uses standard scoring like any other game.
-
-Common games include: Big Buck Hunter, Billiards, Darts, Hammerschlagen, and Bank — but any game can be added on the fly.
-
----
-
-SCORING:
-
-Use whatever scoring settings were confirmed during setup.
-
-**Default standard scoring:**
-- Points = (number of players − finishing position + 1)
-- Example with 5 players: 1st=5pts, 2nd=4pts, 3rd=3pts, 4th=2pts, 5th=1pt
-
-**Default tie rule:**
-- Split the combined points for tied places evenly, rounding up (ceiling) to nearest whole number.
-- Example: 1st/2nd tie → (5+4)/2 = 4.5 → each gets 5pts
-
-**Bonus points:**
-- Apply any custom bonuses confirmed during setup after each game if applicable.
-
----
-
-LEADERBOARD:
-After every game, display a clean leaderboard table:
-
-| Rank | Player | Total Points | Games Played |
-
-- Always sorted by total points descending.
-- After the table, give short punchy commentary in the MC's voice — rivalries, trash talk, flavor.
-- Then ask who picks the next game (or prompt the current leader to choose).
-
----
-
-END OF COMPETITION:
-When Bank results are entered and final scores are tallied, crown the winner with a big over-the-top celebration in the MC's voice. Announce any prize or tradition the group established during setup — or if none was given, make up something fitting based on the MC personality and competition feel.
-
----
-
-EDGE CASES:
-- New games can be added at any time; use the confirmed scoring model.
-- Skipped games are simply never tracked.
-- Bank can technically be chosen at any time but always ends the competition immediately after results are entered.
-- Always scale scoring to the actual number of players in the session.
-- If a player joins late, ask how to handle their prior scores (default: 0 for games missed).
-- If scoring settings need to be changed mid-competition, allow it but note which games were scored under the old rules.`;
-
-  let messages = [];
-  let busy = false;
-
-  // ── Init ──
-  window.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('anthropic_api_key')) {
-      showWelcome();
+  // ── Personality Screen ─────────────────────────────────────────
+  function initPersonalityGrid() {
+    const grid = document.getElementById('personalityGrid');
+    grid.innerHTML = '';
+    for (const [key, p] of Object.entries(PERSONALITIES)) {
+      const card = document.createElement('div');
+      card.className = 'personality-card' + (state.personality === key ? ' selected' : '');
+      card.dataset.key = key;
+      card.innerHTML = `<div class="personality-emoji">${p.emoji}</div><div class="personality-name">${p.name}</div>`;
+      card.onclick = () => selectPersonality(key);
+      grid.appendChild(card);
     }
-    // else apiKeyScreen is visible by default
-  });
-
-  function showKeyScreen() {
-    document.getElementById('apiKeyScreen').style.display = 'flex';
-    document.getElementById('welcomeScreen').style.display = 'none';
-    document.getElementById('chatArea').style.display = 'none';
   }
 
-  function showWelcome() {
-    document.getElementById('apiKeyScreen').style.display = 'none';
-    document.getElementById('welcomeScreen').style.display = 'flex';
-    document.getElementById('chatArea').style.display = 'none';
+  function selectPersonality(key) {
+    state.personality = key;
+    document.querySelectorAll('.personality-card').forEach(c => {
+      c.classList.toggle('selected', c.dataset.key === key);
+    });
+    document.getElementById('personalityNext').disabled = false;
   }
 
-  function saveKey() {
-    const key = document.getElementById('apiKeyInput').value.trim();
-    if (!key.startsWith('sk-ant-')) {
-      alert('That doesn\'t look like a valid Anthropic key (should start with sk-ant-).');
+  function goToPlayers() {
+    if (!state.personality) return;
+    showScreen('players');
+    renderPlayerList();
+    document.getElementById('playerNameInput').focus();
+  }
+
+  // ── Players Screen ─────────────────────────────────────────────
+  function addPlayer() {
+    const input = document.getElementById('playerNameInput');
+    const name = input.value.trim();
+    if (!name) return;
+    if (state.players.includes(name)) {
+      input.value = '';
+      input.focus();
       return;
     }
-    localStorage.setItem('anthropic_api_key', key);
-    document.getElementById('apiKeyInput').value = '';
-    showWelcome();
-  }
-
-  // Allow Enter in key input
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('apiKeyInput').addEventListener('keydown', e => {
-      if (e.key === 'Enter') saveKey();
-    });
-  });
-
-  // ── Chat helpers ──
-  function autoResize(el) {
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-  }
-
-  function handleKey(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  }
-
-  function setBusy(state) {
-    busy = state;
-    document.getElementById('sendBtn').disabled = state;
-    document.getElementById('userInput').disabled = state;
-  }
-
-  function scrollBottom() {
-    const el = document.getElementById('messages');
-    el.scrollTop = el.scrollHeight;
-  }
-
-  function addBubble(role, html = '') {
-    const msgs = document.getElementById('messages');
-    const wrap = document.createElement('div');
-    wrap.className = `message ${role}`;
-    const label = document.createElement('div');
-    label.className = 'msg-label';
-    label.textContent = role === 'user' ? 'You' : 'MC';
-    const bubble = document.createElement('div');
-    bubble.className = 'msg-bubble';
-    if (html) {
-      bubble.innerHTML = html;
-    } else if (role === 'assistant') {
-      bubble.innerHTML = '<div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
-    }
-    wrap.appendChild(label);
-    wrap.appendChild(bubble);
-    msgs.appendChild(wrap);
-    scrollBottom();
-    return bubble;
-  }
-
-  // ── Anthropic API (direct browser call) ──
-  async function callAPI() {
-    const apiKey = localStorage.getItem('anthropic_api_key');
-    if (!apiKey) { showKeyScreen(); return; }
-
-    setBusy(true);
-    const bubble = addBubble('assistant');
-
-    try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 2048,
-          stream: true,
-          system: SYSTEM_PROMPT,
-          messages,
-        }),
-      });
-
-      if (res.status === 401) {
-        localStorage.removeItem('anthropic_api_key');
-        bubble.textContent = '⚠️ Invalid API key. Please re-enter your key.';
-        setBusy(false);
-        showKeyScreen();
-        return;
-      }
-
-      if (!res.ok) throw new Error(`API error ${res.status}`);
-
-      const reader = res.body.getReader();
-      const dec = new TextDecoder();
-      let buf = '';
-      let full = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += dec.decode(value, { stream: true });
-        const lines = buf.split('\n');
-        buf = lines.pop();
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          const raw = line.slice(6).trim();
-          try {
-            const obj = JSON.parse(raw);
-            if (obj.type === 'content_block_delta' && obj.delta?.type === 'text_delta') {
-              full += obj.delta.text;
-              bubble.innerHTML = marked.parse(full);
-              scrollBottom();
-            }
-          } catch (_) {}
-        }
-      }
-
-      messages.push({ role: 'assistant', content: full });
-    } catch (err) {
-      bubble.textContent = '⚠️ ' + err.message;
-    }
-
-    setBusy(false);
-    document.getElementById('userInput').focus();
-  }
-
-  async function startSession() {
-    document.getElementById('welcomeScreen').style.display = 'none';
-    document.getElementById('chatArea').style.display = 'flex';
-    messages = [{ role: 'user', content: 'Start the session.' }];
-    await callAPI();
-  }
-
-  async function sendMessage() {
-    const input = document.getElementById('userInput');
-    const text = input.value.trim();
-    if (!text || busy) return;
+    state.players.push(name);
     input.value = '';
-    input.style.height = 'auto';
-    addBubble('user', marked.parse(text));
-    messages.push({ role: 'user', content: text });
-    await callAPI();
+    input.focus();
+    renderPlayerList();
   }
 
-  function newSession() {
-    if (busy) return;
-    messages = [];
-    document.getElementById('messages').innerHTML = '';
-    showWelcome();
+  function removePlayer(name) {
+    state.players = state.players.filter(p => p !== name);
+    renderPlayerList();
   }
+
+  function renderPlayerList() {
+    const list = document.getElementById('playerList');
+    list.innerHTML = '';
+    state.players.forEach((name, i) => {
+      const row = document.createElement('div');
+      row.className = 'player-row';
+      row.innerHTML = `
+        <div class="player-badge">
+          <span class="player-badge-num">${i + 1}</span>
+          <span>${name}</span>
+        </div>
+        <button class="btn-danger" onclick="removePlayer('${name.replace(/'/g, "\\'")}')">✕</button>
+      `;
+      list.appendChild(row);
+    });
+    document.getElementById('playersNext').disabled = state.players.length < 2;
+  }
+
+  function goToScoring() {
+    if (state.players.length < 2) return;
+    showScreen('scoring');
+    renderBonusList();
+  }
+
+  // ── Scoring Screen ─────────────────────────────────────────────
+  function addBonusType() {
+    const nameIn = document.getElementById('bonusNameInput');
+    const ptsIn = document.getElementById('bonusPtsInput');
+    const name = nameIn.value.trim();
+    const pts = parseInt(ptsIn.value);
+    if (!name || !pts || pts < 1) return;
+    state.bonusTypes.push({ name, pts });
+    nameIn.value = '';
+    ptsIn.value = '';
+    nameIn.focus();
+    renderBonusList();
+  }
+
+  function removeBonusType(i) {
+    state.bonusTypes.splice(i, 1);
+    renderBonusList();
+  }
+
+  function renderBonusList() {
+    const list = document.getElementById('bonusList');
+    list.innerHTML = '';
+    state.bonusTypes.forEach((b, i) => {
+      const item = document.createElement('div');
+      item.className = 'bonus-item';
+      item.innerHTML = `<span>${b.name}</span><span>+${b.pts} pts</span><button class="btn-danger" onclick="removeBonusType(${i})">✕</button>`;
+      list.appendChild(item);
+    });
+  }
+
+  // ── Game Start ─────────────────────────────────────────────────
+  function startGame() {
+    // Initialize total scores
+    state.totalScores = {};
+    state.players.forEach(p => { state.totalScores[p] = 0; });
+    state.games = [];
+    state.gameOver = false;
+
+    const p = mc();
+    const intro = pick(p.intro);
+
+    // Update hub labels
+    document.getElementById('mcLabel').textContent = `${p.emoji} ${p.name}`;
+    setCommentary(intro);
+    renderLeaderboard();
+    showScreen('hub');
+  }
+
+  function setCommentary(text) {
+    document.getElementById('commentaryText').textContent = text;
+  }
+
+  // ── Leaderboard ────────────────────────────────────────────────
+  function rankBadge(rank) {
+    if (rank === 1) return `<span class="rank-badge gold-badge">1</span>`;
+    if (rank === 2) return `<span class="rank-badge silver-badge">2</span>`;
+    if (rank === 3) return `<span class="rank-badge bronze-badge">3</span>`;
+    return `<span class="rank-badge plain-badge">${rank}</span>`;
+  }
+
+  function renderLeaderboard(targetId = 'leaderboardTable') {
+    const sorted = [...state.players].sort((a, b) => (state.totalScores[b] || 0) - (state.totalScores[a] || 0));
+    const table = document.getElementById(targetId);
+
+    let rank = 1;
+    const rows = sorted.map((player, i) => {
+      if (i > 0 && state.totalScores[sorted[i - 1]] !== state.totalScores[player]) rank = i + 1;
+      const gamesPlayed = state.games.filter(g => g.scores[player] !== undefined).length;
+      const isFirst = rank === 1;
+      return `<tr class="${isFirst ? 'rank-1' : ''}">
+        <td>${rankBadge(rank)}</td>
+        <td class="player-col">${player}</td>
+        <td style="font-family:'Oswald',sans-serif;font-size:1.05rem;color:${isFirst ? 'var(--gold)' : 'var(--text)'}">${state.totalScores[player] || 0}</td>
+        <td style="color:var(--text2)">${gamesPlayed}</td>
+      </tr>`;
+    });
+
+    table.innerHTML = `
+      <thead><tr>
+        <th>Rank</th><th>Player</th><th>Points</th><th>Games</th>
+      </tr></thead>
+      <tbody>${rows.join('')}</tbody>
+    `;
+
+    // Update games-played chips if we have games
+    const section = document.getElementById('gamesPlayedSection');
+    const chips = document.getElementById('gamesPlayedChips');
+    if (state.games.length > 0) {
+      section.style.display = 'block';
+      chips.innerHTML = state.games.map(g => `<span class="game-chip">${g.name}</span>`).join('');
+    }
+
+    // Leaderboard label
+    const label = document.getElementById('leaderboardLabel');
+    if (label) label.textContent = state.games.length === 0 ? 'Standings (No games yet)' : `Standings after ${state.games.length} game${state.games.length > 1 ? 's' : ''}`;
+  }
+
+  // ── Add Game Screen ────────────────────────────────────────────
+  function initAddGame() {
+    document.getElementById('gameNameInput').value = '';
+
+    // Build place selects
+    const list = document.getElementById('playerRankList');
+    list.innerHTML = '';
+    const N = state.players.length;
+
+    state.players.forEach((player, i) => {
+      const row = document.createElement('div');
+      row.className = 'player-rank-row';
+
+      const options = Array.from({ length: N }, (_, k) => {
+        const place = k + 1;
+        const suffix = place === 1 ? 'st' : place === 2 ? 'nd' : place === 3 ? 'rd' : 'th';
+        const sel = place === i + 1 ? ' selected' : '';
+        return `<option value="${place}"${sel}>${place}${suffix}</option>`;
+      }).join('');
+
+      row.innerHTML = `
+        <span class="player-rank-name">${player}</span>
+        <select class="place-select" data-player="${player}">${options}</select>
+      `;
+      list.appendChild(row);
+    });
+
+    // Build bonus rows if any bonus types defined
+    const bonusBlock = document.getElementById('bonusApplyBlock');
+    const bonusRows = document.getElementById('bonusApplyRows');
+    if (state.bonusTypes.length > 0) {
+      bonusBlock.style.display = 'block';
+      bonusRows.innerHTML = state.bonusTypes.map((b, i) => {
+        const playerOptions = `<option value="">Nobody</option>` +
+          state.players.map(p => `<option value="${p}">${p}</option>`).join('');
+        return `<div class="bonus-apply-row">
+          <span class="bonus-apply-name">${b.name}</span>
+          <span class="bonus-pts-label">+${b.pts}</span>
+          <select class="player-select" data-bonus-index="${i}">${playerOptions}</select>
+        </div>`;
+      }).join('');
+    } else {
+      bonusBlock.style.display = 'none';
+    }
+
+    document.getElementById('gameNameInput').focus();
+  }
+
+  function submitGame() {
+    const gameName = document.getElementById('gameNameInput').value.trim();
+    if (!gameName) {
+      document.getElementById('gameNameInput').focus();
+      return;
+    }
+
+    // Collect places
+    const selects = document.querySelectorAll('#playerRankList .place-select');
+    const playerRanks = [];
+    selects.forEach(sel => {
+      playerRanks.push({ name: sel.dataset.player, rank: parseInt(sel.value) });
+    });
+
+    // Calculate scores
+    const scores = calculateGameScores(playerRanks, state.players.length);
+
+    // Collect bonuses
+    const bonuses = {};
+    document.querySelectorAll('#bonusApplyRows .player-select').forEach(sel => {
+      const player = sel.value;
+      if (!player) return;
+      const idx = parseInt(sel.dataset.bonusIndex);
+      const pts = state.bonusTypes[idx].pts;
+      bonuses[player] = (bonuses[player] || 0) + pts;
+    });
+
+    // Apply to totals
+    for (const [player, pts] of Object.entries(scores)) {
+      state.totalScores[player] = (state.totalScores[player] || 0) + pts;
+    }
+    for (const [player, pts] of Object.entries(bonuses)) {
+      state.totalScores[player] = (state.totalScores[player] || 0) + pts;
+    }
+
+    state.games.push({ name: gameName, scores, bonuses });
+
+    const isBank = gameName.toLowerCase().trim() === 'bank';
+
+    if (isBank) {
+      showCelebrate();
+    } else {
+      buildHubCommentary(gameName, playerRanks, scores);
+      renderLeaderboard();
+      showScreen('hub');
+    }
+  }
+
+  function buildHubCommentary(gameName, playerRanks, scores) {
+    const sorted = [...playerRanks].sort((a, b) => a.rank - b.rank);
+    const winner = sorted[0].name;
+    const loser = sorted[sorted.length - 1].name;
+
+    // Check for ties at top
+    const tied = sorted.filter(p => p.rank === sorted[0].rank);
+    let line = '';
+
+    if (tied.length > 1) {
+      const names = tied.map(p => p.name).join(' & ');
+      line = mcLine('tie', { players: names, game: gameName });
+    } else {
+      line = mcLine('firstPlace', { player: winner, game: gameName });
+    }
+
+    // Add leaderboard update
+    const leader = Object.entries(state.totalScores).sort((a, b) => b[1] - a[1])[0];
+    const leaderLine = mcLine('leaderUpdate', { leader: leader[0], pts: leader[1] });
+
+    setCommentary(line + ' ' + leaderLine);
+    document.getElementById('mcLabel').textContent = `${mc().emoji} ${mc().name}`;
+  }
+
+  // ── Scoring Logic ──────────────────────────────────────────────
+  function calculateGameScores(playerRanks, numPlayers) {
+    // Sort by rank value (lower = better)
+    const sorted = [...playerRanks].sort((a, b) => a.rank - b.rank);
+    const scores = {};
+    let i = 0;
+
+    while (i < sorted.length) {
+      // Find all players with same rank (tied group)
+      let j = i;
+      while (j < sorted.length && sorted[j].rank === sorted[i].rank) j++;
+
+      // Points for positions i+1 through j (1-indexed positions in N-player game)
+      let totalPts = 0;
+      for (let k = i; k < j; k++) {
+        totalPts += (numPlayers - k); // position k (0-indexed) → (N - k) points
+      }
+      const ptsEach = Math.ceil(totalPts / (j - i));
+
+      for (let k = i; k < j; k++) {
+        scores[sorted[k].name] = ptsEach;
+      }
+      i = j;
+    }
+
+    return scores;
+  }
+
+  // ── Celebrate Screen ───────────────────────────────────────────
+  function showCelebrate() {
+    const sorted = [...state.players].sort((a, b) => state.totalScores[b] - state.totalScores[a]);
+    const winner = sorted[0];
+
+    // Check for overall tie
+    const tied = sorted.filter(p => state.totalScores[p] === state.totalScores[winner]);
+    let winnerText;
+    if (tied.length > 1) {
+      winnerText = `🤝 It's a tie! ${tied.join(' & ')} share the championship with ${state.totalScores[winner]} points!`;
+    } else {
+      winnerText = `🥇 ${winner} wins with ${state.totalScores[winner]} points!`;
+    }
+
+    document.getElementById('celebrateWinner').textContent = winnerText;
+    document.getElementById('celebrateQuote').textContent = pick(mc().finalWin).replace('{winner}', tied.length > 1 ? tied.join(' & ') : winner);
+
+    renderLeaderboard('finalLeaderboard');
+    // Copy final leaderboard HTML
+    document.getElementById('finalLeaderboard').innerHTML = document.getElementById('leaderboardTable').innerHTML;
+
+    showScreen('celebrate');
+  }
+
+  // ── New Session ────────────────────────────────────────────────
+  function newSession() {
+    state.personality = null;
+    state.players = [];
+    state.bonusTypes = [];
+    state.games = [];
+    state.totalScores = {};
+    state.gameOver = false;
+    document.getElementById('gamesPlayedSection').style.display = 'none';
+    showScreen('welcome');
+  }
+
+  // ── Init ───────────────────────────────────────────────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    initPersonalityGrid();
+  });
 </script>
 </body>
 </html>
