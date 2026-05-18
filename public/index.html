@@ -405,18 +405,6 @@
       margin-bottom: 6px;
     }
 
-    .player-rank-list { display: flex; flex-direction: column; gap: 8px; }
-    .player-rank-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--bg3);
-      border: 1px solid var(--gold-dim);
-      border-radius: var(--radius);
-      padding: 10px 14px;
-    }
-    .player-rank-name { font-weight: 500; font-size: 0.95rem; }
-
     select {
       background: var(--bg2);
       border: 1px solid var(--gold-dim);
@@ -432,6 +420,87 @@
     }
     select:focus { border-color: var(--gold); }
     select option { background: var(--bg2); font-family: 'Inter', sans-serif; font-weight: 400; }
+
+    /* ── Drag-and-drop rank groups ── */
+    .rank-list { display: flex; flex-direction: column; gap: 6px; }
+
+    .rank-group {
+      background: var(--bg3);
+      border: 1.5px solid var(--gold-dim);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: grab;
+      user-select: none;
+      transition: opacity 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+    .rank-group:active { cursor: grabbing; }
+    .rank-group.dragging { opacity: 0.3; }
+    .rank-group.drag-over {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 2px var(--gold-glow);
+    }
+    .rank-group.tied { border-color: rgba(255,215,0,0.5); }
+
+    .rank-group-label {
+      padding: 4px 12px 3px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(255,215,0,0.07);
+      border-bottom: 1px solid var(--gold-dim);
+    }
+
+    .rank-player-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .rank-player-row:last-child { border-bottom: none; }
+
+    .drag-handle {
+      color: var(--text2);
+      font-size: 1rem;
+      flex-shrink: 0;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .rank-player-name { flex: 1; font-size: 0.93rem; font-weight: 500; }
+
+    .tie-btn-group { display: flex; gap: 4px; flex-shrink: 0; }
+
+    .btn-tie {
+      background: transparent;
+      border: 1px solid var(--gold-dim);
+      color: var(--text2);
+      border-radius: 5px;
+      padding: 4px 9px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+    .btn-tie:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+
+    .btn-untie {
+      background: rgba(224,85,85,0.07);
+      border: 1px solid rgba(224,85,85,0.3);
+      color: var(--danger);
+      border-radius: 5px;
+      padding: 4px 9px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+    .btn-untie:hover { background: rgba(224,85,85,0.15); }
 
     /* ── Bonus apply ── */
     .bonus-apply-block {
@@ -602,8 +671,9 @@
   </div>
 
   <div>
-    <div class="form-label">Finishing Order <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text2)">(ties allowed — same place = same points)</span></div>
-    <div class="player-rank-list" id="playerRankList"></div>
+    <div class="form-label">Finishing Order</div>
+    <p class="hint" style="margin-bottom:10px">Drag to reorder · Use Tie buttons to mark shared places</p>
+    <div id="playerRankList" class="rank-list"></div>
   </div>
 
   <div class="bonus-apply-block" id="bonusApplyBlock" style="display:none">
@@ -654,13 +724,18 @@
 
   const state = {
     players: [],
-    games: [],          // game names enabled for tonight (from preset + custom)
+    games: [],
     scoringModel: 'finishing-order',
     finalGame: 'Bank',
-    bonusTypes: [],     // [{name, pts}]
-    results: [],        // [{name, scores:{player:pts}, bonuses:{player:pts}}]
-    totalScores: {},    // {player: cumPts}
+    bonusTypes: [],
+    results: [],
+    totalScores: {},
   };
+
+  // groups: array of string-arrays representing finishing order.
+  // Each inner array is a tied group. groups[0] = 1st place, etc.
+  // Place for group i = 1 + sum of sizes of groups 0..(i-1).
+  let groups = [];
 
   // ── Utilities ──────────────────────────────────────────────────
   function showScreen(id) {
@@ -668,8 +743,17 @@
     document.getElementById('screen-' + id).classList.add('active');
   }
 
-  function placeLabel(n) {
-    return n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : n + 'th';
+  function placeStr(n) {
+    if (n === 1) return '1st';
+    if (n === 2) return '2nd';
+    if (n === 3) return '3rd';
+    return n + 'th';
+  }
+
+  function placeForGroup(gIdx) {
+    let p = 1;
+    for (let i = 0; i < gIdx; i++) p += groups[i].length;
+    return p;
   }
 
   // ── Config: Players ────────────────────────────────────────────
@@ -737,7 +821,6 @@
     state.games.push(name);
     input.value = '';
     input.focus();
-    // Refresh preset chips in case name matches a preset
     initPresetChips();
   }
 
@@ -806,16 +889,12 @@
     state.totalScores = {};
     state.players.forEach(p => { state.totalScores[p] = 0; });
     state.results = [];
-
     document.getElementById('headerSetupBtn').style.display = '';
     renderLeaderboard();
     showScreen('hub');
   }
 
-  function goToConfig() {
-    // Return to config without resetting state, so they can tweak mid-session
-    showScreen('config');
-  }
+  function goToConfig() { showScreen('config'); }
 
   // ── Hub ────────────────────────────────────────────────────────
   function openAddGame() {
@@ -840,7 +919,6 @@
     const sorted = [...state.players].sort(
       (a, b) => (state.totalScores[b] || 0) - (state.totalScores[a] || 0)
     );
-
     let rank = 1;
     const rows = sorted.map((player, i) => {
       if (i > 0 && state.totalScores[sorted[i-1]] !== state.totalScores[player]) rank = i + 1;
@@ -854,38 +932,41 @@
         <td style="color:var(--text2)">${played}</td>
       </tr>`;
     });
-
     document.getElementById(targetId).innerHTML = `
       <thead><tr><th>Rank</th><th>Player</th><th>Points</th><th>Games</th></tr></thead>
       <tbody>${rows.join('')}</tbody>`;
-
     const label = document.getElementById('leaderboardLabel');
     if (label) {
       const n = state.results.length;
-      label.textContent = n === 0 ? 'Standings — no games yet' : `Standings after ${n} game${n > 1 ? 's' : ''}`;
+      label.textContent = n === 0
+        ? 'Standings — no games yet'
+        : `Standings after ${n} game${n > 1 ? 's' : ''}`;
     }
-
     const section = document.getElementById('gamesPlayedSection');
     if (section) {
+      section.style.display = state.results.length > 0 ? 'block' : 'none';
       if (state.results.length > 0) {
-        section.style.display = 'block';
         document.getElementById('gamesPlayedChips').innerHTML =
           state.results.map(r => `<span class="game-chip">${r.name}</span>`).join('');
-      } else {
-        section.style.display = 'none';
       }
     }
   }
 
-  // ── Add Game ───────────────────────────────────────────────────
+  // ── Add Game: group list ───────────────────────────────────────
+  // groups is module-level so tie/untie/drag handlers can mutate it.
+
   function initAddGame() {
-    // Game picker: dropdown if games configured, else text input
+    // Each player starts in their own group in configured order
+    groups = state.players.map(p => [p]);
+
+    // Game picker
     const pickerWrap = document.getElementById('gamePickerWrap');
     if (state.games.length > 0) {
-      const options = state.games.map(g => `<option value="${g}">${g}</option>`).join('');
+      const opts = state.games.map(g => `<option value="${g}">${g}</option>`).join('');
       pickerWrap.innerHTML = `
-        <select id="gameSelect" onchange="onGameSelectChange(this)"
-          style="width:100%;margin-bottom:8px">${options}<option value="__custom__">Other…</option></select>
+        <select id="gameSelect" onchange="onGameSelectChange(this)" style="width:100%;margin-bottom:8px">
+          ${opts}<option value="__custom__">Other…</option>
+        </select>
         <input type="text" id="gameNameInput" placeholder="Game name…" maxlength="40"
           style="display:none;width:100%">`;
     } else {
@@ -894,23 +975,221 @@
           style="width:100%">`;
     }
 
-    // Place selects
-    const list = document.getElementById('playerRankList');
-    list.innerHTML = '';
-    const N = state.players.length;
-    state.players.forEach((player, i) => {
-      const options = Array.from({ length: N }, (_, k) =>
-        `<option value="${k+1}"${k === i ? ' selected' : ''}>${placeLabel(k+1)}</option>`
-      ).join('');
-      const row = document.createElement('div');
-      row.className = 'player-rank-row';
-      row.innerHTML = `
-        <span class="player-rank-name">${player}</span>
-        <select data-player="${player}">${options}</select>`;
-      list.appendChild(row);
-    });
+    renderGroupList();
+    initBonusRows();
+  }
 
-    // Bonus rows
+  function renderGroupList() {
+    const container = document.getElementById('playerRankList');
+    container.innerHTML = '';
+
+    groups.forEach((group, gIdx) => {
+      const place = placeForGroup(gIdx);
+      const isTied = group.length > 1;
+      const isFirst = gIdx === 0;
+      const isLast  = gIdx === groups.length - 1;
+
+      const el = document.createElement('div');
+      el.className = 'rank-group' + (isTied ? ' tied' : '');
+      el.dataset.idx = gIdx;
+      el.draggable = true;
+
+      // Place label header
+      const label = document.createElement('div');
+      label.className = 'rank-group-label';
+      label.textContent = placeStr(place) + (isTied ? ' — tied' : '');
+      el.appendChild(label);
+
+      // One row per player in the group
+      group.forEach(name => {
+        const row = document.createElement('div');
+        row.className = 'rank-player-row';
+
+        const handle = document.createElement('span');
+        handle.className = 'drag-handle';
+        handle.textContent = '⠿';
+        row.appendChild(handle);
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'rank-player-name';
+        nameSpan.textContent = name;
+        row.appendChild(nameSpan);
+
+        if (isTied) {
+          const btn = document.createElement('button');
+          btn.className = 'btn-untie';
+          btn.textContent = '✕ Untie';
+          btn.onclick = e => { e.stopPropagation(); untiePlayer(name, gIdx); };
+          row.appendChild(btn);
+        } else {
+          const btnGroup = document.createElement('div');
+          btnGroup.className = 'tie-btn-group';
+
+          if (!isFirst) {
+            const up = document.createElement('button');
+            up.className = 'btn-tie';
+            up.textContent = '↑ Tie';
+            up.title = `Tie with ${groups[gIdx - 1].join(' & ')}`;
+            up.onclick = e => { e.stopPropagation(); tieUp(gIdx); };
+            btnGroup.appendChild(up);
+          }
+          if (!isLast) {
+            const dn = document.createElement('button');
+            dn.className = 'btn-tie';
+            dn.textContent = '↓ Tie';
+            dn.title = `Tie with ${groups[gIdx + 1].join(' & ')}`;
+            dn.onclick = e => { e.stopPropagation(); tieDown(gIdx); };
+            btnGroup.appendChild(dn);
+          }
+          row.appendChild(btnGroup);
+        }
+
+        el.appendChild(row);
+      });
+
+      // ── HTML5 drag-and-drop (desktop) ──
+      el.addEventListener('dragstart', e => {
+        if (e.target.closest('button')) { e.preventDefault(); return; }
+        dragSrcIdx = gIdx;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', gIdx); // required for Firefox
+        requestAnimationFrame(() => el.classList.add('dragging'));
+      });
+
+      el.addEventListener('dragend', () => {
+        el.classList.remove('dragging');
+        container.querySelectorAll('.rank-group').forEach(g => g.classList.remove('drag-over'));
+        dragSrcIdx = null;
+      });
+
+      el.addEventListener('dragover', e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        container.querySelectorAll('.rank-group').forEach(g => g.classList.remove('drag-over'));
+        if (dragSrcIdx !== null && dragSrcIdx !== gIdx) el.classList.add('drag-over');
+      });
+
+      el.addEventListener('dragleave', e => {
+        if (!el.contains(e.relatedTarget)) el.classList.remove('drag-over');
+      });
+
+      el.addEventListener('drop', e => {
+        e.preventDefault();
+        el.classList.remove('drag-over');
+        if (dragSrcIdx === null || dragSrcIdx === gIdx) return;
+        const src = dragSrcIdx;
+        const [moved] = groups.splice(src, 1);
+        const dest = gIdx > src ? gIdx - 1 : gIdx;
+        groups.splice(dest, 0, moved);
+        dragSrcIdx = null;
+        renderGroupList();
+      });
+
+      container.appendChild(el);
+    });
+  }
+
+  // Tie operations
+  function tieUp(gIdx) {
+    if (gIdx === 0) return;
+    groups[gIdx - 1] = [...groups[gIdx - 1], ...groups[gIdx]];
+    groups.splice(gIdx, 1);
+    renderGroupList();
+  }
+
+  function tieDown(gIdx) {
+    if (gIdx >= groups.length - 1) return;
+    groups[gIdx] = [...groups[gIdx], ...groups[gIdx + 1]];
+    groups.splice(gIdx + 1, 1);
+    renderGroupList();
+  }
+
+  function untiePlayer(name, gIdx) {
+    groups[gIdx] = groups[gIdx].filter(p => p !== name);
+    // Insert the untied player as their own group right after
+    groups.splice(gIdx + 1, 0, [name]);
+    renderGroupList();
+  }
+
+  // Convert groups → playerRanks format for scoring
+  function groupsToPlayerRanks() {
+    const ranks = [];
+    let place = 1;
+    for (const group of groups) {
+      for (const name of group) ranks.push({ name, rank: place });
+      place += group.length;
+    }
+    return ranks;
+  }
+
+  // ── Drag state (HTML5 DnD) ─────────────────────────────────────
+  let dragSrcIdx = null;
+
+  // ── Touch drag state ───────────────────────────────────────────
+  let touch = { active: false, srcIdx: null, srcEl: null, clone: null, startX: 0, startY: 0 };
+
+  document.addEventListener('touchstart', e => {
+    const groupEl = e.target.closest('.rank-group');
+    if (!groupEl || e.target.closest('button')) return;
+    const t = e.touches[0];
+    const rect = groupEl.getBoundingClientRect();
+    const clone = groupEl.cloneNode(true);
+    clone.style.cssText = `position:fixed;top:${rect.top}px;left:${rect.left}px;
+      width:${rect.width}px;opacity:0.85;z-index:9999;pointer-events:none;
+      box-shadow:0 8px 32px rgba(0,0,0,0.6);border-radius:12px;`;
+    document.body.appendChild(clone);
+    groupEl.style.opacity = '0.25';
+    touch = {
+      active: true,
+      srcIdx: parseInt(groupEl.dataset.idx),
+      srcEl: groupEl,
+      clone,
+      startX: t.clientX,
+      startY: t.clientY,
+    };
+  }, { passive: true });
+
+  document.addEventListener('touchmove', e => {
+    if (!touch.active) return;
+    e.preventDefault();
+    const t = e.touches[0];
+    touch.clone.style.transform =
+      `translate(${t.clientX - touch.startX}px,${t.clientY - touch.startY}px)`;
+
+    // Highlight drop target
+    touch.clone.style.visibility = 'hidden';
+    const under = document.elementFromPoint(t.clientX, t.clientY);
+    touch.clone.style.visibility = '';
+    document.querySelectorAll('.rank-group').forEach(g => g.classList.remove('drag-over'));
+    const target = under?.closest('.rank-group');
+    if (target && target !== touch.srcEl) target.classList.add('drag-over');
+  }, { passive: false });
+
+  document.addEventListener('touchend', e => {
+    if (!touch.active) return;
+    const { srcIdx, srcEl, clone } = touch;
+    const t = e.changedTouches[0];
+
+    clone.remove();
+    srcEl.style.opacity = '';
+    document.querySelectorAll('.rank-group').forEach(g => g.classList.remove('drag-over'));
+
+    // Find drop target (clone removed so elementFromPoint works)
+    const under = document.elementFromPoint(t.clientX, t.clientY);
+    const targetEl = under?.closest('.rank-group');
+    if (targetEl && targetEl !== srcEl) {
+      const destIdx = parseInt(targetEl.dataset.idx);
+      const [moved] = groups.splice(srcIdx, 1);
+      const dest = destIdx > srcIdx ? destIdx - 1 : destIdx;
+      groups.splice(dest, 0, moved);
+      renderGroupList();
+    }
+
+    touch = { active: false };
+  }, { passive: true });
+
+  // ── Bonus rows (reused in initAddGame) ────────────────────────
+  function initBonusRows() {
     const bonusBlock = document.getElementById('bonusApplyBlock');
     const bonusRows  = document.getElementById('bonusApplyRows');
     if (state.bonusTypes.length > 0) {
@@ -937,27 +1216,20 @@
   function getGameName() {
     const sel = document.getElementById('gameSelect');
     if (sel) {
-      if (sel.value === '__custom__') {
-        return (document.getElementById('gameNameInput')?.value.trim()) || '';
-      }
-      return sel.value;
+      return sel.value === '__custom__'
+        ? (document.getElementById('gameNameInput')?.value.trim() || '')
+        : sel.value;
     }
-    return (document.getElementById('gameNameInput')?.value.trim()) || '';
+    return document.getElementById('gameNameInput')?.value.trim() || '';
   }
 
   function submitGame() {
     const gameName = getGameName();
     if (!gameName) return;
 
-    // Collect places
-    const playerRanks = [...document.querySelectorAll('#playerRankList select')].map(sel => ({
-      name: sel.dataset.player,
-      rank: parseInt(sel.value),
-    }));
-
+    const playerRanks = groupsToPlayerRanks();
     const scores = calculateGameScores(playerRanks, state.players.length);
 
-    // Collect bonuses
     const bonuses = {};
     document.querySelectorAll('#bonusApplyRows select').forEach(sel => {
       if (!sel.value) return;
@@ -965,7 +1237,6 @@
       bonuses[sel.value] = (bonuses[sel.value] || 0) + pts;
     });
 
-    // Apply to totals
     Object.entries(scores).forEach(([p, pts]) => { state.totalScores[p] += pts; });
     Object.entries(bonuses).forEach(([p, pts]) => { state.totalScores[p] += pts; });
 
@@ -983,16 +1254,13 @@
   // ── Scoring logic ──────────────────────────────────────────────
   function calculateGameScores(playerRanks, numPlayers) {
     if (state.scoringModel === 'win-only') {
-      const sorted = [...playerRanks].sort((a, b) => a.rank - b.rank);
       const scores = {};
       playerRanks.forEach(p => { scores[p.name] = 0; });
-      // All players tied for 1st get 1 pt
-      const best = sorted[0].rank;
-      sorted.filter(p => p.rank === best).forEach(p => { scores[p.name] = 1; });
+      const best = Math.min(...playerRanks.map(p => p.rank));
+      playerRanks.filter(p => p.rank === best).forEach(p => { scores[p.name] = 1; });
       return scores;
     }
-
-    // Finishing-order: sort by rank, assign pts N..1, average ties (ceiling)
+    // Finishing-order: average tied places (ceiling)
     const sorted = [...playerRanks].sort((a, b) => a.rank - b.rank);
     const scores = {};
     let i = 0;
@@ -1010,11 +1278,10 @@
 
   // ── Celebrate ──────────────────────────────────────────────────
   function showCelebrate() {
-    renderLeaderboard();  // ensure final state is current
+    renderLeaderboard();
     const sorted = [...state.players].sort((a, b) => state.totalScores[b] - state.totalScores[a]);
     const topScore = state.totalScores[sorted[0]];
     const tied = sorted.filter(p => state.totalScores[p] === topScore);
-
     if (tied.length > 1) {
       document.getElementById('celebrateTitle').textContent = "It's a Tie!";
       document.getElementById('celebrateWinner').textContent =
@@ -1024,22 +1291,21 @@
       document.getElementById('celebrateWinner').textContent =
         `${sorted[0]} wins with ${topScore} points.`;
     }
-
     document.getElementById('finalLeaderboard').innerHTML =
       document.getElementById('leaderboardTable').innerHTML;
-
     showScreen('celebrate');
   }
 
   // ── New session ────────────────────────────────────────────────
   function newSession() {
-    state.players    = [];
-    state.games      = [];
+    state.players     = [];
+    state.games       = [];
     state.scoringModel = 'finishing-order';
-    state.finalGame  = 'Bank';
-    state.bonusTypes = [];
-    state.results    = [];
+    state.finalGame   = 'Bank';
+    state.bonusTypes  = [];
+    state.results     = [];
     state.totalScores = {};
+    groups = [];
 
     document.getElementById('playerList').querySelectorAll('.player-row').forEach(el => el.remove());
     document.getElementById('playerListHint').style.display = '';
