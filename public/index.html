@@ -32,7 +32,6 @@
       overflow: hidden;
     }
 
-    /* ── Header ── */
     header {
       background: var(--bg3);
       border-bottom: 2px solid var(--gold);
@@ -44,11 +43,7 @@
       box-shadow: 0 2px 20px rgba(255, 215, 0, 0.1);
     }
 
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
 
     .header-left h1 {
       font-family: 'Oswald', sans-serif;
@@ -61,7 +56,9 @@
 
     .header-icon { font-size: 1.5rem; }
 
-    #newSessionBtn {
+    .header-actions { display: flex; gap: 8px; align-items: center; }
+
+    .btn-outline {
       background: transparent;
       border: 1.5px solid var(--gold);
       color: var(--gold);
@@ -76,15 +73,108 @@
       transition: all 0.2s;
     }
 
-    #newSessionBtn:hover {
-      background: var(--gold);
-      color: var(--bg);
+    .btn-outline:hover { background: var(--gold); color: var(--bg); }
+
+    .btn-icon {
+      background: transparent;
+      border: 1.5px solid var(--gold-dim);
+      color: var(--text2);
+      width: 34px;
+      height: 34px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
     }
 
-    /* ── Welcome Screen ── */
-    #welcomeScreen {
+    .btn-icon:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* API Key Screen */
+    #apiKeyScreen {
       flex: 1;
       display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    #apiKeyScreen h2 {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    #apiKeyScreen p {
+      color: var(--text2);
+      max-width: 400px;
+      line-height: 1.7;
+      font-size: 0.93rem;
+    }
+
+    .key-input-wrap {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      max-width: 440px;
+    }
+
+    #apiKeyInput {
+      flex: 1;
+      background: var(--bg3);
+      border: 1px solid var(--gold-dim);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 11px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.93rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    #apiKeyInput:focus { border-color: var(--gold); }
+    #apiKeyInput::placeholder { color: var(--text2); }
+
+    #saveKeyBtn {
+      background: var(--gold);
+      color: var(--bg);
+      border: none;
+      padding: 11px 22px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    #saveKeyBtn:hover { box-shadow: 0 2px 14px var(--gold-glow); }
+
+    .key-note {
+      font-size: 0.78rem;
+      color: var(--text2);
+      max-width: 400px;
+      line-height: 1.6;
+    }
+
+    .key-note a { color: var(--gold); text-decoration: none; }
+    .key-note a:hover { text-decoration: underline; }
+
+    /* Welcome Screen */
+    #welcomeScreen {
+      flex: 1;
+      display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
@@ -113,12 +203,7 @@
       letter-spacing: 2px;
     }
 
-    #welcomeScreen p {
-      color: var(--text2);
-      max-width: 420px;
-      line-height: 1.7;
-      font-size: 0.95rem;
-    }
+    #welcomeScreen p { color: var(--text2); max-width: 420px; line-height: 1.7; font-size: 0.95rem; }
 
     #startBtn {
       background: var(--gold);
@@ -136,10 +221,7 @@
       margin-top: 8px;
     }
 
-    #startBtn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 24px var(--gold-glow);
-    }
+    #startBtn:hover { transform: scale(1.05); box-shadow: 0 4px 24px var(--gold-glow); }
 
     .welcome-features {
       display: flex;
@@ -158,13 +240,8 @@
       color: var(--text2);
     }
 
-    /* ── Chat Area ── */
-    #chatArea {
-      flex: 1;
-      display: none;
-      flex-direction: column;
-      overflow: hidden;
-    }
+    /* Chat */
+    #chatArea { flex: 1; display: none; flex-direction: column; overflow: hidden; }
 
     #messages {
       flex: 1;
@@ -180,7 +257,6 @@
     #messages::-webkit-scrollbar { width: 4px; }
     #messages::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
 
-    /* ── Messages ── */
     .message {
       display: flex;
       flex-direction: column;
@@ -193,7 +269,7 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .message.user  { align-self: flex-end; }
+    .message.user { align-self: flex-end; }
     .message.assistant { align-self: flex-start; }
 
     .msg-label {
@@ -227,7 +303,6 @@
       border-bottom-left-radius: 4px;
     }
 
-    /* ── Markdown content ── */
     .msg-bubble p { margin: 6px 0; }
     .msg-bubble p:first-child { margin-top: 0; }
     .msg-bubble p:last-child  { margin-bottom: 0; }
@@ -242,16 +317,12 @@
     .msg-bubble h1 { font-size: 1.15rem; }
     .msg-bubble h2 { font-size: 1.05rem; }
     .msg-bubble h3 { font-size: 0.95rem; }
-    .msg-bubble h1:first-child,
-    .msg-bubble h2:first-child,
-    .msg-bubble h3:first-child { margin-top: 0; }
+    .msg-bubble h1:first-child, .msg-bubble h2:first-child, .msg-bubble h3:first-child { margin-top: 0; }
 
     .msg-bubble strong { color: var(--gold); font-weight: 600; }
     .msg-bubble em { color: #a0a0c0; font-style: italic; }
-
     .msg-bubble ul, .msg-bubble ol { margin: 6px 0 6px 20px; }
     .msg-bubble li { margin: 3px 0; }
-
     .msg-bubble code {
       background: rgba(255,215,0,0.1);
       padding: 1px 5px;
@@ -260,7 +331,6 @@
       font-family: monospace;
     }
 
-    /* Leaderboard table */
     .msg-bubble table {
       border-collapse: collapse;
       width: 100%;
@@ -269,12 +339,7 @@
       border-radius: 8px;
       overflow: hidden;
     }
-
-    .msg-bubble thead tr {
-      background: var(--gold);
-      color: var(--bg);
-    }
-
+    .msg-bubble thead tr { background: var(--gold); color: var(--bg); }
     .msg-bubble th {
       padding: 9px 13px;
       text-align: left;
@@ -284,48 +349,25 @@
       letter-spacing: 0.5px;
       font-size: 0.82rem;
     }
-
-    .msg-bubble td {
-      padding: 8px 13px;
-      border-bottom: 1px solid var(--gold-dim);
-    }
-
-    .msg-bubble tbody tr:first-child td {
-      color: var(--gold);
-      font-weight: 600;
-    }
-
+    .msg-bubble td { padding: 8px 13px; border-bottom: 1px solid var(--gold-dim); }
+    .msg-bubble tbody tr:first-child td { color: var(--gold); font-weight: 600; }
     .msg-bubble tbody tr:last-child td { border-bottom: none; }
+    .msg-bubble tbody tr:hover td { background: rgba(255,215,0,0.04); }
 
-    .msg-bubble tbody tr:hover td {
-      background: rgba(255,215,0,0.04);
-    }
-
-    /* ── Typing indicator ── */
-    .typing {
-      display: flex;
-      gap: 5px;
-      align-items: center;
-      padding: 2px 0;
-    }
-
+    .typing { display: flex; gap: 5px; align-items: center; padding: 2px 0; }
     .typing-dot {
-      width: 7px;
-      height: 7px;
+      width: 7px; height: 7px;
       border-radius: 50%;
       background: var(--gold);
       animation: pulse 1.2s ease-in-out infinite;
     }
-
     .typing-dot:nth-child(2) { animation-delay: 0.2s; }
     .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
     @keyframes pulse {
       0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
       40%            { transform: scale(1);   opacity: 1; }
     }
 
-    /* ── Input area ── */
     #inputArea {
       background: var(--bg2);
       border-top: 1px solid var(--gold-dim);
@@ -361,8 +403,7 @@
       background: var(--gold);
       color: var(--bg);
       border: none;
-      width: 44px;
-      height: 44px;
+      width: 44px; height: 44px;
       border-radius: var(--radius);
       cursor: pointer;
       font-size: 1.1rem;
@@ -372,15 +413,9 @@
       flex-shrink: 0;
       transition: all 0.2s;
     }
-
-    #sendBtn:hover:not(:disabled) {
-      transform: scale(1.08);
-      box-shadow: 0 2px 14px var(--gold-glow);
-    }
-
+    #sendBtn:hover:not(:disabled) { transform: scale(1.08); box-shadow: 0 2px 14px var(--gold-glow); }
     #sendBtn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* ── Responsive ── */
     @media (max-width: 580px) {
       .message { max-width: 95%; }
       #messages { padding: 14px; gap: 14px; }
@@ -395,8 +430,26 @@
     <span class="header-icon">🏆</span>
     <h1>KJ's Games Scorecard</h1>
   </div>
-  <button id="newSessionBtn" onclick="newSession()">New Session</button>
+  <div class="header-actions">
+    <button class="btn-icon" onclick="showKeyScreen()" title="Change API key">🔑</button>
+    <button class="btn-outline" onclick="newSession()">New Session</button>
+  </div>
 </header>
+
+<!-- API Key Setup -->
+<div id="apiKeyScreen">
+  <div style="font-size:3rem">🔑</div>
+  <h2>Enter Your API Key</h2>
+  <p>This app runs entirely in your browser. Your Anthropic API key is stored only in your local browser storage and never sent anywhere except Anthropic's API.</p>
+  <div class="key-input-wrap">
+    <input id="apiKeyInput" type="password" placeholder="sk-ant-..." />
+    <button id="saveKeyBtn" onclick="saveKey()">Save</button>
+  </div>
+  <p class="key-note">
+    Don't have a key? Get one at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>.
+    Your key is saved to <code>localStorage</code> and never leaves your device.
+  </p>
+</div>
 
 <!-- Welcome -->
 <div id="welcomeScreen">
@@ -425,19 +478,136 @@
 <script>
   marked.use({ gfm: true, breaks: true });
 
+  const SYSTEM_PROMPT = `You are an AI-powered scorekeeper and hype-man for a friendly group competition called "KJ's Games Scorecard."
+
+---
+
+SESSION SETUP (runs once at the start of every new session):
+
+Before anything else, collect the following in order:
+
+1. **MC Personality** — Ask: "How should I act as your MC? Give me a vibe, theme, or character (e.g. 'Wisconsin cheesehead', 'pirate', 'overly dramatic sports announcer', 'southern BBQ pitmaster'). I'll lean into it hard."
+
+2. **Player Names** — Ask: "Who's playing today? Give me all the names."
+
+3. **Scoring Settings** — Before locking in, present the current scoring rules and ask if they want to change anything:
+
+   Default scoring settings:
+   - Scoring model: Finishing-order points (1st = N pts, last = 1 pt, where N = number of players)
+   - Ties: Split combined place points, round up (ceiling) to nearest whole number
+   - Final game: Bank (dice) — signals end of competition, uses standard scoring
+   - Bonus points: None by default
+
+   Ask: "Want to tweak any of these before we start? You can change the scoring model, add bonus points for anything (longest streak, trash talk champion, etc.), or adjust tie rules. Say 'looks good' to use defaults."
+
+   Lock in whatever settings they confirm, and briefly summarize them.
+
+Once all three are set, greet the group with a punchy 2–3 sentence intro that matches the MC personality. Then ask what game they're playing first.
+
+---
+
+PERSONALITY:
+Fully embody whatever MC personality was given. Use matching slang, humor, references, and flavor throughout — in commentary, taunts, celebrations, and transitions. Keep it short and punchy. Never break character.
+
+---
+
+GAMES:
+The game list is completely flexible — players may skip games, invent new ones, or play in any order. The ONLY thing that signals the end of the competition is when a player chooses "Bank" (a dice game) as the next game. Bank is ALWAYS the final game and uses standard scoring like any other game.
+
+Common games include: Big Buck Hunter, Billiards, Darts, Hammerschlagen, and Bank — but any game can be added on the fly.
+
+---
+
+SCORING:
+
+Use whatever scoring settings were confirmed during setup.
+
+**Default standard scoring:**
+- Points = (number of players − finishing position + 1)
+- Example with 5 players: 1st=5pts, 2nd=4pts, 3rd=3pts, 4th=2pts, 5th=1pt
+
+**Default tie rule:**
+- Split the combined points for tied places evenly, rounding up (ceiling) to nearest whole number.
+- Example: 1st/2nd tie → (5+4)/2 = 4.5 → each gets 5pts
+
+**Bonus points:**
+- Apply any custom bonuses confirmed during setup after each game if applicable.
+
+---
+
+LEADERBOARD:
+After every game, display a clean leaderboard table:
+
+| Rank | Player | Total Points | Games Played |
+
+- Always sorted by total points descending.
+- After the table, give short punchy commentary in the MC's voice — rivalries, trash talk, flavor.
+- Then ask who picks the next game (or prompt the current leader to choose).
+
+---
+
+END OF COMPETITION:
+When Bank results are entered and final scores are tallied, crown the winner with a big over-the-top celebration in the MC's voice. Announce any prize or tradition the group established during setup — or if none was given, make up something fitting based on the MC personality and competition feel.
+
+---
+
+EDGE CASES:
+- New games can be added at any time; use the confirmed scoring model.
+- Skipped games are simply never tracked.
+- Bank can technically be chosen at any time but always ends the competition immediately after results are entered.
+- Always scale scoring to the actual number of players in the session.
+- If a player joins late, ask how to handle their prior scores (default: 0 for games missed).
+- If scoring settings need to be changed mid-competition, allow it but note which games were scored under the old rules.`;
+
   let messages = [];
   let busy = false;
 
+  // ── Init ──
+  window.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('anthropic_api_key')) {
+      showWelcome();
+    }
+    // else apiKeyScreen is visible by default
+  });
+
+  function showKeyScreen() {
+    document.getElementById('apiKeyScreen').style.display = 'flex';
+    document.getElementById('welcomeScreen').style.display = 'none';
+    document.getElementById('chatArea').style.display = 'none';
+  }
+
+  function showWelcome() {
+    document.getElementById('apiKeyScreen').style.display = 'none';
+    document.getElementById('welcomeScreen').style.display = 'flex';
+    document.getElementById('chatArea').style.display = 'none';
+  }
+
+  function saveKey() {
+    const key = document.getElementById('apiKeyInput').value.trim();
+    if (!key.startsWith('sk-ant-')) {
+      alert('That doesn\'t look like a valid Anthropic key (should start with sk-ant-).');
+      return;
+    }
+    localStorage.setItem('anthropic_api_key', key);
+    document.getElementById('apiKeyInput').value = '';
+    showWelcome();
+  }
+
+  // Allow Enter in key input
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('apiKeyInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') saveKey();
+    });
+  });
+
+  // ── Chat helpers ──
   function autoResize(el) {
     el.style.height = 'auto';
     el.style.height = Math.min(el.scrollHeight, 120) + 'px';
   }
 
   function handleKey(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   }
 
   function setBusy(state) {
@@ -453,23 +623,18 @@
 
   function addBubble(role, html = '') {
     const msgs = document.getElementById('messages');
-
     const wrap = document.createElement('div');
     wrap.className = `message ${role}`;
-
     const label = document.createElement('div');
     label.className = 'msg-label';
     label.textContent = role === 'user' ? 'You' : 'MC';
-
     const bubble = document.createElement('div');
     bubble.className = 'msg-bubble';
-
     if (html) {
       bubble.innerHTML = html;
     } else if (role === 'assistant') {
       bubble.innerHTML = '<div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
     }
-
     wrap.appendChild(label);
     wrap.appendChild(bubble);
     msgs.appendChild(wrap);
@@ -477,18 +642,41 @@
     return bubble;
   }
 
+  // ── Anthropic API (direct browser call) ──
   async function callAPI() {
+    const apiKey = localStorage.getItem('anthropic_api_key');
+    if (!apiKey) { showKeyScreen(); return; }
+
     setBusy(true);
     const bubble = addBubble('assistant');
 
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages }),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 2048,
+          stream: true,
+          system: SYSTEM_PROMPT,
+          messages,
+        }),
       });
 
-      if (!res.ok) throw new Error(`Server error ${res.status}`);
+      if (res.status === 401) {
+        localStorage.removeItem('anthropic_api_key');
+        bubble.textContent = '⚠️ Invalid API key. Please re-enter your key.';
+        setBusy(false);
+        showKeyScreen();
+        return;
+      }
+
+      if (!res.ok) throw new Error(`API error ${res.status}`);
 
       const reader = res.body.getReader();
       const dec = new TextDecoder();
@@ -498,20 +686,16 @@
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
         buf += dec.decode(value, { stream: true });
         const lines = buf.split('\n');
         buf = lines.pop();
-
         for (const line of lines) {
           if (!line.startsWith('data: ')) continue;
           const raw = line.slice(6).trim();
-          if (raw === '[DONE]') continue;
           try {
             const obj = JSON.parse(raw);
-            if (obj.error) throw new Error(obj.error);
-            if (obj.text) {
-              full += obj.text;
+            if (obj.type === 'content_block_delta' && obj.delta?.type === 'text_delta') {
+              full += obj.delta.text;
               bubble.innerHTML = marked.parse(full);
               scrollBottom();
             }
@@ -539,13 +723,10 @@
     const input = document.getElementById('userInput');
     const text = input.value.trim();
     if (!text || busy) return;
-
     input.value = '';
     input.style.height = 'auto';
-
     addBubble('user', marked.parse(text));
     messages.push({ role: 'user', content: text });
-
     await callAPI();
   }
 
@@ -553,8 +734,7 @@
     if (busy) return;
     messages = [];
     document.getElementById('messages').innerHTML = '';
-    document.getElementById('chatArea').style.display = 'none';
-    document.getElementById('welcomeScreen').style.display = 'flex';
+    showWelcome();
   }
 </script>
 </body>
