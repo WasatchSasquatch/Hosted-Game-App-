@@ -366,7 +366,11 @@
       padding: 4px 12px;
       font-size: 0.78rem;
       color: var(--text2);
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.15s, color 0.15s;
     }
+    .game-chip:hover { border-color: var(--gold); color: var(--gold); }
 
     .hub-actions {
       display: flex;
@@ -663,7 +667,7 @@
 
 <!-- SCREEN: Add Game -->
 <div id="screen-addgame" class="screen">
-  <div class="screen-section-title">Game Result</div>
+  <div class="screen-section-title" id="addgameTitle">Game Result</div>
 
   <div>
     <div class="form-label">Game</div>
@@ -683,7 +687,7 @@
   </div>
 
   <div style="display:flex;gap:10px;margin-top:auto;padding-top:8px">
-    <button class="btn-secondary" onclick="showScreen('hub')">Cancel</button>
+    <button class="btn-secondary" onclick="cancelAddGame()">Cancel</button>
     <button class="btn-primary" style="flex:1" onclick="submitGame()">Submit Results</button>
   </div>
 </div>
@@ -736,6 +740,7 @@
   // Each inner array is a tied group. groups[0] = 1st place, etc.
   // Place for group i = 1 + sum of sizes of groups 0..(i-1).
   let groups = [];
+  let editingResultIdx = null;
 
   // ── Utilities ──────────────────────────────────────────────────
   function showScreen(id) {
@@ -898,8 +903,38 @@
 
   // ── Hub ────────────────────────────────────────────────────────
   function openAddGame() {
-    initAddGame();
+    editingResultIdx = null;
+    document.getElementById('addgameTitle').textContent = 'Game Result';
+    initAddGame(null);
     showScreen('addgame');
+  }
+
+  function openEditGame(i) {
+    editingResultIdx = i;
+    document.getElementById('addgameTitle').textContent = 'Edit Game Result';
+    const result = state.results[i];
+    initAddGame(result.groups.map(g => [...g]));
+    // Pre-fill game name
+    const oldName = result.name;
+    const sel = document.getElementById('gameSelect');
+    if (sel) {
+      if (state.games.includes(oldName)) {
+        sel.value = oldName;
+      } else {
+        sel.value = '__custom__';
+        const inp = document.getElementById('gameNameInput');
+        inp.style.display = 'block';
+        inp.value = oldName;
+      }
+    } else {
+      document.getElementById('gameNameInput').value = oldName;
+    }
+    showScreen('addgame');
+  }
+
+  function cancelAddGame() {
+    editingResultIdx = null;
+    showScreen('hub');
   }
 
   function endCompetition() {
@@ -947,7 +982,7 @@
       section.style.display = state.results.length > 0 ? 'block' : 'none';
       if (state.results.length > 0) {
         document.getElementById('gamesPlayedChips').innerHTML =
-          state.results.map(r => `<span class="game-chip">${r.name}</span>`).join('');
+          state.results.map((r, i) => `<button class="game-chip" onclick="openEditGame(${i})">${r.name}</button>`).join('');
       }
     }
   }
@@ -955,9 +990,8 @@
   // ── Add Game: group list ───────────────────────────────────────
   // groups is module-level so tie/untie/drag handlers can mutate it.
 
-  function initAddGame() {
-    // Each player starts in their own group in configured order
-    groups = state.players.map(p => [p]);
+  function initAddGame(preGroups) {
+    groups = preGroups || state.players.map(p => [p]);
 
     // Game picker
     const pickerWrap = document.getElementById('gamePickerWrap');
@@ -1224,8 +1258,12 @@
   }
 
   function submitGame() {
-    const gameName = getGameName();
-    if (!gameName) return;
+    let gameName = getGameName();
+    if (!gameName) {
+      gameName = editingResultIdx !== null
+        ? state.results[editingResultIdx].name
+        : `Game ${state.results.length + 1}`;
+    }
 
     const playerRanks = groupsToPlayerRanks();
     const scores = calculateGameScores(playerRanks, state.players.length);
@@ -1237,10 +1275,20 @@
       bonuses[sel.value] = (bonuses[sel.value] || 0) + pts;
     });
 
-    Object.entries(scores).forEach(([p, pts]) => { state.totalScores[p] += pts; });
-    Object.entries(bonuses).forEach(([p, pts]) => { state.totalScores[p] += pts; });
-
-    state.results.push({ name: gameName, scores, bonuses });
+    if (editingResultIdx !== null) {
+      // Reverse old result's scores before applying new ones
+      const old = state.results[editingResultIdx];
+      Object.entries(old.scores).forEach(([p, pts]) => { state.totalScores[p] -= pts; });
+      Object.entries(old.bonuses || {}).forEach(([p, pts]) => { state.totalScores[p] -= pts; });
+      Object.entries(scores).forEach(([p, pts]) => { state.totalScores[p] += pts; });
+      Object.entries(bonuses).forEach(([p, pts]) => { state.totalScores[p] += pts; });
+      state.results[editingResultIdx] = { name: gameName, scores, bonuses, groups: groups.map(g => [...g]) };
+      editingResultIdx = null;
+    } else {
+      Object.entries(scores).forEach(([p, pts]) => { state.totalScores[p] += pts; });
+      Object.entries(bonuses).forEach(([p, pts]) => { state.totalScores[p] += pts; });
+      state.results.push({ name: gameName, scores, bonuses, groups: groups.map(g => [...g]) });
+    }
 
     const isFinal = state.finalGame && gameName.toLowerCase() === state.finalGame.toLowerCase();
     if (isFinal) {
@@ -1306,6 +1354,7 @@
     state.results     = [];
     state.totalScores = {};
     groups = [];
+    editingResultIdx = null;
 
     document.getElementById('playerList').querySelectorAll('.player-row').forEach(el => el.remove());
     document.getElementById('playerListHint').style.display = '';
