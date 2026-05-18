@@ -506,6 +506,16 @@
     }
     .btn-untie:hover { background: rgba(224,85,85,0.15); }
 
+    .projected-score {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--gold);
+      min-width: 28px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
     /* ── Bonus apply ── */
     .bonus-apply-block {
       background: var(--bg3);
@@ -622,11 +632,11 @@
     <div class="hint" style="margin-top:4px">Ties: averaged points for tied places, rounded up.</div>
   </div>
 
-  <!-- Final game -->
+  <!-- Rounds -->
   <div class="config-section">
-    <div class="config-section-title">Final Game</div>
-    <p class="hint">Entering this game name ends the competition and shows final standings. Leave blank to end manually.</p>
-    <input type="text" id="finalGameInput" placeholder="e.g. Bank" maxlength="40" value="Bank">
+    <div class="config-section-title">Rounds</div>
+    <p class="hint">How many games will you play? Leave blank or 0 for unlimited — use the End button to finish manually.</p>
+    <input type="number" id="roundsInput" placeholder="e.g. 5" min="1" max="99" style="max-width:120px">
   </div>
 
   <!-- Bonus points -->
@@ -730,7 +740,7 @@
     players: [],
     games: [],
     scoringModel: 'finishing-order',
-    finalGame: 'Bank',
+    rounds: 0,
     bonusTypes: [],
     results: [],
     totalScores: {},
@@ -890,7 +900,7 @@
   // ── Session start ──────────────────────────────────────────────
   function startSession() {
     if (state.players.length < 2) return;
-    state.finalGame = document.getElementById('finalGameInput').value.trim();
+    state.rounds = parseInt(document.getElementById('roundsInput').value) || 0;
     state.totalScores = {};
     state.players.forEach(p => { state.totalScores[p] = 0; });
     state.results = [];
@@ -1017,6 +1027,8 @@
     const container = document.getElementById('playerRankList');
     container.innerHTML = '';
 
+    const projected = calculateGameScores(groupsToPlayerRanks(), state.players.length);
+
     groups.forEach((group, gIdx) => {
       const place = placeForGroup(gIdx);
       const isTied = group.length > 1;
@@ -1048,6 +1060,11 @@
         nameSpan.className = 'rank-player-name';
         nameSpan.textContent = name;
         row.appendChild(nameSpan);
+
+        const scoreSpan = document.createElement('span');
+        scoreSpan.className = 'projected-score';
+        scoreSpan.textContent = '+' + projected[name];
+        row.appendChild(scoreSpan);
 
         if (isTied) {
           const btn = document.createElement('button');
@@ -1284,18 +1301,19 @@
       Object.entries(bonuses).forEach(([p, pts]) => { state.totalScores[p] += pts; });
       state.results[editingResultIdx] = { name: gameName, scores, bonuses, groups: groups.map(g => [...g]) };
       editingResultIdx = null;
+      renderLeaderboard();
+      showScreen('hub');
     } else {
       Object.entries(scores).forEach(([p, pts]) => { state.totalScores[p] += pts; });
       Object.entries(bonuses).forEach(([p, pts]) => { state.totalScores[p] += pts; });
       state.results.push({ name: gameName, scores, bonuses, groups: groups.map(g => [...g]) });
-    }
-
-    const isFinal = state.finalGame && gameName.toLowerCase() === state.finalGame.toLowerCase();
-    if (isFinal) {
-      showCelebrate();
-    } else {
-      renderLeaderboard();
-      showScreen('hub');
+      const isFinal = state.rounds > 0 && state.results.length >= state.rounds;
+      if (isFinal) {
+        showCelebrate();
+      } else {
+        renderLeaderboard();
+        showScreen('hub');
+      }
     }
   }
 
@@ -1349,7 +1367,7 @@
     state.players     = [];
     state.games       = [];
     state.scoringModel = 'finishing-order';
-    state.finalGame   = 'Bank';
+    state.rounds      = 0;
     state.bonusTypes  = [];
     state.results     = [];
     state.totalScores = {};
@@ -1359,7 +1377,7 @@
     document.getElementById('playerList').querySelectorAll('.player-row').forEach(el => el.remove());
     document.getElementById('playerListHint').style.display = '';
     document.getElementById('startBtn').disabled = true;
-    document.getElementById('finalGameInput').value = 'Bank';
+    document.getElementById('roundsInput').value = '';
     document.getElementById('headerSetupBtn').style.display = 'none';
     document.getElementById('gamesPlayedSection').style.display = 'none';
     document.getElementById('bonusList').innerHTML = '';
