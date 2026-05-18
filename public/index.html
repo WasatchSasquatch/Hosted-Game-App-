@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KJ's Games Scorecard</title>
+  <title>KJ's Scorecard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -592,7 +592,7 @@
 <header>
   <div class="header-left">
     <span class="header-icon">🏆</span>
-    <h1>KJ's Games Scorecard</h1>
+    <h1>KJ's Scorecard</h1>
   </div>
   <button class="btn-outline" id="headerSetupBtn" onclick="goToConfig()" style="display:none">Setup</button>
 </header>
@@ -629,7 +629,7 @@
   <div class="config-section">
     <div class="config-section-title">Scoring</div>
     <div class="scoring-options" id="scoringOptions"></div>
-    <div class="hint" style="margin-top:4px">Ties: averaged points for tied places, rounded up.</div>
+    <div class="hint" style="margin-top:4px">Ties: tied players share their place and each receive equal points for that rank.</div>
   </div>
 
   <!-- Rounds -->
@@ -685,8 +685,8 @@
   </div>
 
   <div>
-    <div class="form-label">Finishing Order</div>
-    <p class="hint" style="margin-bottom:10px">Drag to reorder · Use Tie buttons to mark shared places</p>
+    <div class="form-label" id="finishingOrderLabel">Finishing Order</div>
+    <p class="hint" style="margin-bottom:10px" id="finishingOrderHint">Drag to reorder · Use Tie buttons to mark shared places</p>
     <div id="playerRankList" class="rank-list"></div>
   </div>
 
@@ -727,12 +727,17 @@
     {
       id: 'finishing-order',
       name: 'Finishing-order points',
-      desc: '1st = N pts, 2nd = N−1 pts … last = 1 pt',
+      desc: '1st = N pts, 2nd = N−1 pts … last = 1 pt. Ties share their place.',
     },
     {
       id: 'win-only',
       name: 'Win only',
       desc: 'Winner gets 1 pt, everyone else gets 0',
+    },
+    {
+      id: 'manual',
+      name: 'Manual entry',
+      desc: 'Type in exact points for each player after each game',
     },
   ];
 
@@ -766,9 +771,7 @@
   }
 
   function placeForGroup(gIdx) {
-    let p = 1;
-    for (let i = 0; i < gIdx; i++) p += groups[i].length;
-    return p;
+    return gIdx + 1;
   }
 
   // ── Config: Players ────────────────────────────────────────────
@@ -1019,8 +1022,46 @@
           style="width:100%">`;
     }
 
-    renderGroupList();
+    if (state.scoringModel === 'manual') {
+      document.getElementById('finishingOrderLabel').textContent = 'Scores';
+      document.getElementById('finishingOrderHint').textContent = 'Enter points earned by each player this game.';
+      renderManualScoreList();
+    } else {
+      document.getElementById('finishingOrderLabel').textContent = 'Finishing Order';
+      document.getElementById('finishingOrderHint').textContent = 'Drag to reorder · Use Tie buttons to mark shared places';
+      renderGroupList();
+    }
     initBonusRows();
+  }
+
+  function renderManualScoreList() {
+    const container = document.getElementById('playerRankList');
+    container.innerHTML = '';
+    const oldScores = editingResultIdx !== null ? state.results[editingResultIdx].scores : null;
+    state.players.forEach(name => {
+      const el = document.createElement('div');
+      el.className = 'rank-group';
+      const row = document.createElement('div');
+      row.className = 'rank-player-row';
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'rank-player-name';
+      nameSpan.textContent = name;
+      row.appendChild(nameSpan);
+
+      const inp = document.createElement('input');
+      inp.type = 'number';
+      inp.className = 'manual-score-input';
+      inp.dataset.player = name;
+      inp.placeholder = 'pts';
+      inp.min = '0';
+      inp.style.cssText = 'flex:0 0 80px;width:80px;text-align:right';
+      if (oldScores) inp.value = oldScores[name] ?? '';
+      row.appendChild(inp);
+
+      el.appendChild(row);
+      container.appendChild(el);
+    });
   }
 
   function renderGroupList() {
@@ -1162,13 +1203,11 @@
     renderGroupList();
   }
 
-  // Convert groups → playerRanks format for scoring
+  // Convert groups → playerRanks using dense ranking (gIdx + 1, ties share same rank)
   function groupsToPlayerRanks() {
     const ranks = [];
-    let place = 1;
-    for (const group of groups) {
-      for (const name of group) ranks.push({ name, rank: place });
-      place += group.length;
+    for (let i = 0; i < groups.length; i++) {
+      for (const name of groups[i]) ranks.push({ name, rank: i + 1 });
     }
     return ranks;
   }
@@ -1282,8 +1321,16 @@
         : `Game ${state.results.length + 1}`;
     }
 
-    const playerRanks = groupsToPlayerRanks();
-    const scores = calculateGameScores(playerRanks, state.players.length);
+    let scores;
+    if (state.scoringModel === 'manual') {
+      scores = {};
+      document.querySelectorAll('.manual-score-input').forEach(inp => {
+        scores[inp.dataset.player] = parseFloat(inp.value) || 0;
+      });
+      groups = state.players.map(p => [p]);
+    } else {
+      scores = calculateGameScores(groupsToPlayerRanks(), state.players.length);
+    }
 
     const bonuses = {};
     document.querySelectorAll('#bonusApplyRows select').forEach(sel => {
@@ -1326,19 +1373,10 @@
       playerRanks.filter(p => p.rank === best).forEach(p => { scores[p.name] = 1; });
       return scores;
     }
-    // Finishing-order: average tied places (ceiling)
-    const sorted = [...playerRanks].sort((a, b) => a.rank - b.rank);
+    // Finishing-order with dense ranking: tied players share their rank,
+    // each earns numPlayers - rank + 1 pts (no place-averaging needed)
     const scores = {};
-    let i = 0;
-    while (i < sorted.length) {
-      let j = i;
-      while (j < sorted.length && sorted[j].rank === sorted[i].rank) j++;
-      let total = 0;
-      for (let k = i; k < j; k++) total += (numPlayers - k);
-      const each = Math.ceil(total / (j - i));
-      for (let k = i; k < j; k++) scores[sorted[k].name] = each;
-      i = j;
-    }
+    playerRanks.forEach(p => { scores[p.name] = Math.max(0, numPlayers - p.rank + 1); });
     return scores;
   }
 
